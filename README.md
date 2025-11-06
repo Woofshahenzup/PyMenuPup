@@ -392,9 +392,15 @@ Your Name
 
 ---
 
-## Screenshots
+## Screenshots and Demo
 
-Add your menu screenshots here
+### Screenshots
+![Main Menu](screenshots/main-menu.png)
+![Configuration Tool](screenshots/config-tool.png)
+
+### Video Demo
+[![PyMenuPup Demo - Full Walkthrough](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+*Click to watch the full demo on YouTube*
 
 ---
 
