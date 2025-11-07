@@ -55,6 +55,35 @@ Graphical configuration tool to customize the menu.
 - GTK system theme integration
 
 ---
+ 
+
+## Distribution Variants
+
+PyMenuPup has different versions optimized for different Linux environments:
+
+### Original Version (Puppy Linux)
+The main version (`pymenu-globicons.py` and `pymenu-config.py`) is designed specifically for Puppy Linux, which:
+- Runs the system as root user by default
+- Does not require the use of `sudo` for system operations
+- Has Puppy Linux specific paths and configurations
+
+### Versions for Standard Linux Distributions
+
+In the `distro-linux/` folder you will find versions adapted for other Linux distributions that use non-root users:
+
+#### **Essora** (`distro-linux/Essora/`)
+Modified version for standard Linux distributions (Debian, Ubuntu, Arch, Fedora, etc.) with the following changes:
+
+- **Permission management**: Proper use of `sudo` for operations requiring elevated privileges
+- **Adapted paths**: Configurations adjusted for standard user directory structures
+- **System commands**: Adaptation of shutdown, reboot and lock commands for multi-user systems
+- **Environment variables**: Correct handling of `$HOME` and `$USER` for non-root users
+
+**When to use each version?**
+- **Use the main version** if you are on Puppy Linux or derivatives
+- **Use the Essora version** if you are on Debian, Ubuntu, Arch, Fedora, Mint or other standard distributions
+
+---
 
 ## Dependencies
 
@@ -155,6 +184,17 @@ Or to use with specific coordinates:
 <Program label="Menu" icon="applications-system">
     /usr/local/bin/pymenu-globicons.py 100 100
 </Program>
+```
+
+In PuppyLinux /root/.jwmrc:
+
+```xml
+<RootMenu label="Menu" labeled="false" height="24" onroot="3">
+```
+then /root/.jwmrc-tray
+
+```xml
+ <TrayButton label="[MENU]" popup="Open menú">exec:pymenu-globicons.py</TrayButton>
 ```
 
 ### Configuring with Tint2
@@ -377,8 +417,8 @@ This project is licensed under the GPL v3 License. See the `LICENSE` file for mo
 
 ## Author
 
-Your Name
-- GitHub: [@your-username](https://github.com/your-username)
+Nilson Morales
+- GitHub: [@woofshahenzup](https://github.com/Woofshahenzup)
 - Forum: [Puppy Linux Forum](https://forum.puppylinux.com)
 
 ---
