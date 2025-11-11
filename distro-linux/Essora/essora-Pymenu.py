@@ -264,24 +264,6 @@ class ConfigManager:
             json.dump(config_data, f, indent=4)
 
 
-def detect_window_manager():
-    """
-    Detecta el window manager desde /etc/windowmanager.
-    Retorna 'openbox' si encuentra openbox-session, 'jwm' en cualquier otro caso.
-    """
-    try:
-        with open('/etc/windowmanager', 'r') as f:
-            wm_content = f.read().strip().lower()
-            if 'openbox-session' in wm_content or 'openbox' in wm_content:
-                return 'openbox'
-    except FileNotFoundError:
-        print("Archivo /etc/windowmanager no encontrado, asumiendo JWM")
-    except Exception as e:
-        print(f"Error leyendo /etc/windowmanager: {e}")
-    
-    return 'jwm'
-
-
 class JWMMenuParser:
     def __init__(self, jwm_file="/usr/share/jwm/jwm/jwmrc"):
         self.jwm_file = jwm_file
@@ -304,18 +286,7 @@ class JWMMenuParser:
         # Leer preferencia de configuración desde el ConfigManager
         config_manager = ConfigManager()
         config = config_manager.config
-        
-        # NUEVA FUNCIONALIDAD: Detectar automáticamente el window manager
-        detected_wm = detect_window_manager()
-        
-        # Si es Openbox, forzar uso de tint2
-        if detected_wm == 'openbox':
-            use_tint2 = True
-            print(f"🔍 Window Manager detectado: Openbox → Usando configuración de Tint2 automáticamente")
-        else:
-            # Si es JWM, usar la preferencia del usuario del JSON
-            use_tint2 = config.get('tray', {}).get('use_tint2', False)
-            print(f"🔍 Window Manager detectado: JWM → Usando configuración del usuario (use_tint2={use_tint2})")
+        use_tint2 = config.get('tray', {}).get('use_tint2', False)
         
         if use_tint2:
             # Intentar leer tint2rc desde la ruta configurada
@@ -356,14 +327,14 @@ class JWMMenuParser:
                                             tray_info['halign'] = halign
                     
                     tray_info['source'] = 'tint2'
-                    print(f"✅ Configuración de tray detectada desde tint2rc: {tray_info}")
+                    print(f"Tray config detected from tint2rc: {tray_info}")
                     self.tray_config = tray_info
                     return tray_info
                     
                 except Exception as e:
-                    print(f"❌ Error parsing tint2 config: {e}")
+                    print(f"Error parsing tint2 config: {e}")
             else:
-                print(f"⚠️ Tint2 config no encontrado en: {tint2_config}")
+                print(f"Tint2 config not found at: {tint2_config}")
         
         # Si no usa Tint2 o falló, intentar con JWM
         try:
@@ -393,10 +364,10 @@ class JWMMenuParser:
                 tray_info['autohide'] = tray_element.get('autohide', 'off').lower()
                 tray_info['source'] = 'jwm'
     
-                print(f"✅ Configuración de tray detectada desde {target_file}: {tray_info}")
+                print(f"Tray config detected from {target_file}: {tray_info}")
     
         except Exception as e:
-            print(f"❌ Error parsing JWM tray config: {e}")
+            print(f"Error parsing JWM tray config: {e}")
     
         self.tray_config = tray_info
         return tray_info

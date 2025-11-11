@@ -79,9 +79,19 @@ Modified version for standard Linux distributions (Debian, Ubuntu, Arch, Fedora,
 - **System commands**: Adaptation of shutdown, reboot and lock commands for multi-user systems
 - **Environment variables**: Correct handling of `$HOME` and `$USER` for non-root users
 
+#### **Trixiepup64** (`distro-linux/Trixiepup64/`)
+Specialized version for Trixiepup64 (Wayland + labwc compositor) with the following features:
+
+- **Wayland compatibility**: Optimized for Wayland display server instead of X11
+- **labwc integration**: Native support for labwc compositor (Openbox-like for Wayland)
+- **Openbox menu parser**: Reads and parses `menu.xml` from Openbox/labwc format
+- **Wayland-specific commands**: Adapted system commands for Wayland environment
+- **Menu.xml structure**: Compatible with standard Openbox menu structure used by labwc's menu generator
+
 **When to use each version?**
 - **Use the main version** if you are on Puppy Linux or derivatives
 - **Use the Essora version** if you are on Debian, Ubuntu, Arch, Fedora, Mint or other standard distributions
+- **Use the Trixiepup64 version** if you are on Trixiepup64 or any Wayland-based system using labwc compositor
 
 ---
 
