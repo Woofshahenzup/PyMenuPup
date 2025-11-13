@@ -6,6 +6,15 @@ A modern, customizable start menu for JWM (Joe's Window Manager) and Puppy Linux
 ![License](https://img.shields.io/badge/license-GPL-green)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
 
+**English | [Español](README-es.md)**
+
+---
+
+## 📖 Documentation
+
+- **[Technical Documentation](TECHNICAL.md)** - In-depth technical guide (English)
+- **[Documentación Técnica](TECHNICAL-es.md)** - Guía técnica detallada (Español)
+
 ---
 
 ## Description
@@ -259,6 +268,9 @@ PyMenuPup/
 ├── pymenu-globicons.py      # Main menu
 ├── pymenu-config.py          # GTK configurator
 ├── README.md                 # This file
+├── README-es.md              # Spanish version
+├── TECHNICAL.md              # Technical documentation (English)
+├── TECHNICAL-es.md           # Technical documentation (Spanish)
 ├── LICENSE                   # GPL License
 └── screenshots/              # Screenshots (optional)
 ```
