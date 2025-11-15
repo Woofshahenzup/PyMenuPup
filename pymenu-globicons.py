@@ -11,6 +11,8 @@ import shlex
 import json
 import urllib.parse
 import locale
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # === 🌍 Diccionario de Traducción ===
 LANG = {
@@ -1249,7 +1251,7 @@ class ArcMenuLauncher(Gtk.Window):
         hostname = self.get_hostname()
         
         header_font_string = self.config['font']['family']
-        header_font_description = Pango.FontDescription(header_font_string)
+        header_font_description = Pango.FontDescription.from_string(header_font_string)
         
         use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
         
@@ -1324,7 +1326,10 @@ class ArcMenuLauncher(Gtk.Window):
             path = f"~/{translated_dir_name}" 
         
             icon_label = Gtk.Label(label=icon) 
-            icon_label.override_font(Pango.FontDescription("Terminess Nerd Font Propo 12"))
+            font = Pango.FontDescription()
+            font.set_family("Terminess Nerd Font Propo")
+            font.set_size(12 * Pango.SCALE)
+            icon_label.override_font(font)
             icon_label.set_name("quick-access-icon")
             icon_label.set_halign(Gtk.Align.CENTER)
             
@@ -1382,7 +1387,10 @@ class ArcMenuLauncher(Gtk.Window):
             button.set_size_request(40, 40)
     
             icon_label = Gtk.Label()
-            icon_label.override_font(Pango.FontDescription("Terminess Nerd Font Propo 12"))
+            font = Pango.FontDescription()
+            font.set_family("Terminess Nerd Font Propo")
+            font.set_size(12 * Pango.SCALE)
+            icon_label.override_font(font)
             icon_label.set_name("social-icon")
             icon_label.set_halign(Gtk.Align.CENTER)
             icon_label.set_markup(f'<span foreground="{color}">{icon}</span>')
@@ -1539,7 +1547,7 @@ class ArcMenuLauncher(Gtk.Window):
             box.pack_start(icon, False, False, 0)
             
             label = Gtk.Label()
-            font_description = Pango.FontDescription(self.config['font']['family'])
+            font_description = Pango.FontDescription.from_string(self.config['font']['family'])
             font_description.set_size(self.config['font']['size_categories'])
             label.override_font(font_description)
             translated_category = TR.get(category, category)
@@ -1731,7 +1739,7 @@ class ArcMenuLauncher(Gtk.Window):
         name_label = Gtk.Label(label=app_info['Name'])
         
         # Estilo de fuente
-        font_description = Pango.FontDescription(self.config['font']['family'])
+        font_description = Pango.FontDescription.from_string(self.config['font']['family'])
         font_description.set_size(self.config['font']['size_names'])
         name_label.override_font(font_description)
         
