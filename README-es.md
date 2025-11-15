@@ -41,7 +41,7 @@ Menú principal que muestra todas las aplicaciones del sistema organizadas por c
 - Búsqueda en tiempo real
 - Acceso rápido a carpetas comunes
 - Integración con redes sociales
-- Creación de accesos directos en el escritorio
+- Creación de accesos directos en el escritorio *(no compatible con ROX-Filer; funciona solo con SpaceFM y gestores derivados)*
 - Soporte de teclado (navegación con teclas de flecha)
 - Menú contextual (clic derecho en aplicaciones)
 
@@ -67,6 +67,13 @@ La versión principal (`pymenu-globicons.py` y `pymenu-config.py`) está diseña
 - Ejecuta el sistema como usuario root por defecto
 - No requiere el uso de `sudo` para operaciones del sistema
 - Tiene rutas y configuraciones específicas de Puppy Linux
+
+### Compatibilidad con EasyOS
+Esta versión principal también es compatible con **EasyOS de Barry Kauler**, debido a que:
+- EasyOS también se ejecuta como **root** por defecto  
+- Utiliza un sistema de archivos frugal con capas, similar al de Puppy Linux  
+- Las rutas del sistema y el entorno funcionan de forma muy parecida a los sistemas basados en Puppy  
+No se requieren modificaciones para ejecutar la versión de Puppy Linux dentro de EasyOS.
 
 ### Versiones para Distribuciones Linux Estándar
 
@@ -382,6 +389,16 @@ grep IconPath ~/.jwmrc
 
 # Reinstala el paquete de iconos
 # (en Puppy Linux usualmente viene incluido)
+```
+
+### Menú incompleto o faltan entradas
+Si tu archivo `.jwmrc` contiene XML mal formado, el menú puede no cargarse completamente.
+Incluso las secciones comentadas pueden causar errores si las etiquetas no están correctamente cerradas.
+
+Ejemplo de un comentario incorrecto:
+
+```xml
+\<!-- comentario sin cerrar
 ```
 
 ### Errores de permisos

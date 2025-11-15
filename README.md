@@ -48,7 +48,7 @@ Main menu that displays all system applications organized by categories.
 - Real-time search
 - Quick access to common folders
 - Social network integration
-- Desktop shortcut creation
+- Desktop shortcut creation *(not supported by ROX-Filer; works only with SpaceFM and related file managers)*
 - Keyboard support (arrow key navigation)
 - Context menu (right-click on applications)
 
@@ -75,6 +75,13 @@ The main version (`pymenu-globicons.py` and `pymenu-config.py`) is designed spec
 - Runs the system as root user by default
 - Does not require the use of `sudo` for system operations
 - Has Puppy Linux specific paths and configurations
+
+### EasyOS Compatibility
+This main version is also compatible with EasyOS by Barry Kauler, since:
+- EasyOS also runs as root by default
+- Uses a frugal layered filesystem similar to Puppy Linux
+- System paths and environment behave closely to Puppy-based systems
+No modifications are required to run the Puppy Linux version inside EasyOS.
 
 ### Versions for Standard Linux Distributions
 
@@ -390,6 +397,16 @@ grep IconPath ~/.jwmrc
 
 # Reinstall icon package
 # (in Puppy Linux it's usually included)
+```
+
+### Incomplete menu or missing entries
+If your .jwmrc contains malformed XML, the menu may fail to load fully.
+Even commented sections can break parsing if the tags are not properly closed.
+
+Example of an incorrect comment:
+
+```xml
+\<!-- unclosed comment 
 ```
 
 ### Permission errors
