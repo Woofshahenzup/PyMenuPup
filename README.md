@@ -182,7 +182,126 @@ sudo ln -s /usr/local/bin/pymenu-globicons.py /usr/local/bin/pymenu
 sudo ln -s /usr/local/bin/pymenu-config.py /usr/local/bin/pymenu-config
 ```
 
+## 🛠️ Building from Source (Using Nuitka on Puppy Linux / EasyOS)
+
+This project allows you to compile Python scripts into highly optimized `.bin` binaries using **Nuitka**, a Python-to-C compiler.  
+Below you'll find what it is, where to get it, and how to use it on Puppy/EasyOS.
+
 ---
+
+### 🧩 What is Nuitka?
+
+**Nuitka** is a true Python compiler written in C++.  
+It takes your `.py` scripts and converts them into:
+- **Native executables** (binaries)
+- Faster performance
+- Lower CPU usage
+- No Python installation required to run them
+
+It's ideal for distributing applications on Puppy Linux because it:
+- Reduces program size
+- Eliminates external dependencies
+- Improves startup speed
+- Better protects source code
+
+---
+
+### 🌐 Where to Get Nuitka?
+
+You can download it directly from the official website:
+- Website: https://nuitka.net  
+- Downloads: https://nuitka.net/pages/download.html  
+- GitHub: https://github.com/Nuitka/Nuitka
+
+On Puppy/EasyOS, it's common to download it to the `/root/` folder:
+
+Example:
+```
+/root/Nuitka-2.9rc5/
+```
+
+Inside you'll find the compilation binary:
+```
+/root/Nuitka-2.9rc5/bin/nuitka
+```
+
+---
+
+### 🔧 1. Install Required Dependencies (Puppy Linux / EasyOS)
+
+To compile, you need to activate the development environment.
+
+**Load devx.sfs:**
+
+Menu → Setup → SFS-Load-on-the-fly → devx.sfs
+
+The `devx` includes:
+- gcc
+- make
+- libc-dev
+- Python.h and other necessary headers
+
+Additionally, install these packages:
+- patchelf
+- python3-zstandard
+- python3-dev
+
+If your Puppy/EasyOS supports `apt`:
+```bash
+apt install patchelf python3-zstandard python3-dev
+```
+
+---
+
+### ⚙️ 2. Compile Scripts Using Nuitka
+
+Example compilation for `pymenu-globicons.py`:
+```bash
+python3 /root/Nuitka-2.9rc5/bin/nuitka \
+    --mode=onefile \
+    --follow-imports \
+    --lto=yes \
+    --static-libpython=no \
+    --plugin-enable=gi \
+    --nofollow-import-to=tkinter \
+    --nofollow-import-to=unittest \
+    --nofollow-import-to=pydoc \
+    --nofollow-import-to=*.tests \
+    --experimental=use_upx \
+    /usr/local/bin/pymenu-globicons.py
+```
+
+The generated executable will appear as:
+```
+pymenu-globicons.bin
+```
+
+You can rename it (remove the `.bin` extension) and move it to `/usr/local/bin`:
+```bash
+mv pymenu-globicons.bin /usr/local/bin/pymenu-globicons
+chmod +x /usr/local/bin/pymenu-globicons
+```
+
+---
+
+### 📝 3. Recommended Nuitka Options
+
+| Option | Description |
+|--------|-------------|
+| `--mode=onefile` | Creates a single executable file |
+| `--lto=yes` | Link-time optimization for size and performance |
+| `--static-libpython=no` | Produces smaller binaries |
+| `--follow-imports` | Includes necessary dependencies |
+| `--experimental=use_upx` | Additional compression (if UPX is available) |
+
+---
+
+### 💡 Tips
+
+- The first compilation may take several minutes
+- Compiled binaries are significantly faster than Python scripts
+- Ensure all Python dependencies are installed before compiling
+- Test the binary after compilation to verify functionality
 
 ## Configuration
 
