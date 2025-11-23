@@ -431,7 +431,8 @@ El archivo `~/.config/pymenu.json` tiene esta estructura:
         "icon_size": 32,
         "category_icon_size": 16,
         "profile_pic_size": 128,
-        "profile_pic_shape": "square"
+        "profile_pic_shape": "square",
+        "header_layout": "left"
     },
     "font": {
         "family": "Sans 12",
@@ -450,7 +451,8 @@ El archivo `~/.config/pymenu.json` tiene esta estructura:
         "hover_background": "rgba(255, 255, 255, 0.1)",
         "button_normal_background": "rgba(0,0,0,0.6)",
         "button_text": "#ECEFF4",
-        "categories_background": "rgba(0,0,0,0.6)"
+        "categories_background": "rgba(0,0,0,0.6)",
+        "use_gtk_theme": true
     },
     "paths": {
         "profile_pic": "/root/.face",
