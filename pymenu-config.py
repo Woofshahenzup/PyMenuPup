@@ -267,7 +267,7 @@ class ConfigWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title=TR['PyMenu Configurator'])
         self.set_default_size(500, 600)
-        self.set_resizable(False)
+        self.set_resizable(True)
         self.connect("destroy", Gtk.main_quit)
         
         self.config_manager = ConfigManager()
@@ -277,9 +277,12 @@ class ConfigWindow(Gtk.Window):
         main_vbox.set_border_width(10)
         self.add(main_vbox)
         
+        # [CORRECCIÓN] Se elimina el scrolled window que no se usaba aquí.
+        
         notebook = Gtk.Notebook()
         main_vbox.pack_start(notebook, True, True, 0)
         
+        # [CORRECCIÓN] Las funciones de creación de pestaña ahora devuelven un Gtk.ScrolledWindow
         notebook.append_page(self.create_window_tab(), Gtk.Label(label=TR['Window']))
         notebook.append_page(self.create_colors_tab(), Gtk.Label(label=TR['Colors']))
         notebook.append_page(self.create_font_tab(), Gtk.Label(label=TR['Font']))
@@ -420,7 +423,7 @@ class ConfigWindow(Gtk.Window):
         profile_pic_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "profile_pic_size")
         grid.attach(profile_pic_size_spin, 1, 13, 1, 1)
 
-        # ------------------- INICIO DE LA NUEVA OPCIÓN (FILA 10) -------------------
+        # ------------------- INICIO DE LA NUEVA OPCIÓN (FILA 14) -------------------
         grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 14, 1, 1)
         
         # ComboBox para la forma (Cuadrada/Circular)
@@ -435,11 +438,11 @@ class ConfigWindow(Gtk.Window):
         # Conectar al método genérico de cambio (que debe existir en tu clase ConfigWindow)
         combobox.connect("changed", self.on_combobox_changed, 'window', 'profile_pic_shape')
         grid.attach(combobox, 1, 14, 1, 1)
-        # ------------------- FIN DE LA NUEVA OPCIÓN (FILA 10) -------------------
+        # ------------------- FIN DE LA NUEVA OPCIÓN (FILA 14) -------------------
 
 
-        # El siguiente widget, alineación horizontal, se mueve a la FILA 11
-        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 15, 1, 1) # <--- CAMBIO DE FILA 10 A 11
+        # El siguiente widget, alineación horizontal, se mueve a la FILA 15
+        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 15, 1, 1) # <--- FILA 15
         halign_combo = Gtk.ComboBoxText()
         halign_options = ["center", "left", "right"]
         for option in halign_options:
@@ -451,9 +454,13 @@ class ConfigWindow(Gtk.Window):
         except ValueError:
             halign_combo.set_active(0)
         halign_combo.connect("changed", self.on_combo_changed, "window", "halign")
-        grid.attach(halign_combo, 1, 15, 1, 1) # <--- CAMBIO DE FILA 10 A 11
+        grid.attach(halign_combo, 1, 15, 1, 1) # <--- FILA 15
 
-        return grid
+        # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window # Devolver el ScrolledWindow
         
     def on_check_toggled(self, check_button, category, key):
         """Handle Gtk.CheckButton toggle events and save the state."""
@@ -528,7 +535,11 @@ class ConfigWindow(Gtk.Window):
         # Deshabilitar widgets si está activo el tema GTK
         self.update_color_widgets_sensitivity()
         
-        return grid
+        # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window # Devolver el ScrolledWindow
         
     def create_font_tab(self):
         grid = Gtk.Grid(row_spacing=10, column_spacing=10)
@@ -553,7 +564,11 @@ class ConfigWindow(Gtk.Window):
             size_spin.connect("value-changed", self.on_spin_button_changed, "font", key)
             grid.attach(size_spin, 1, i, 1, 1)
             
-        return grid
+        # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window # Devolver el ScrolledWindow
 
     def create_paths_tab(self):
         grid = Gtk.Grid(row_spacing=10, column_spacing=10)
@@ -618,7 +633,11 @@ class ConfigWindow(Gtk.Window):
         # Actualizar el estado de los widgets según el checkbox
         self.update_tray_widgets_sensitivity()
         
-        return grid
+        # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window # Devolver el ScrolledWindow
         
     def on_tint2_toggled(self, checkbox):
         """Manejar el toggle del checkbox de Tint2"""
