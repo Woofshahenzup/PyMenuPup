@@ -35,6 +35,9 @@ LANG = {
         'center': 'center',
         'left': 'left',
         'right': 'right',
+        'Hide OS name:': 'Hide OS name:',
+        'Hide kernel:': 'Hide kernel:',
+        'Hide hostname:': 'Hide hostname:',
         'Background color:': 'Background color:',
         'Border color:': 'Border color:',
         'Text normal:': 'Normal text:',
@@ -93,6 +96,9 @@ LANG = {
         'center': 'centro',
         'left': 'izquierda',
         'right': 'derecha',
+        'Hide OS name:': 'Ocultar nombre del OS:',
+        'Hide kernel:': 'Ocultar kernel:',
+        'Hide hostname:': 'Ocultar hostname:',
         'Background color:': 'Fondo:',
         'Border color:': 'Borde:',
         'Text normal:': 'Texto categoria:',
@@ -179,7 +185,10 @@ class ConfigManager:
                 "category_icon_size": 16,
                 "profile_pic_size": 128,
                 "profile_pic_shape": "square",   
-                "header_layout": "left"
+                "header_layout": "left",
+                "hide_os_name": False,
+                "hide_kernel": False,
+                "hide_hostname": False
             },
             "font": {
                 "family": "Terminess Nerd Font Propo",
@@ -251,7 +260,7 @@ class ConfigWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title=TR['PyMenu Configurator'])
         self.set_default_size(500, 600)
-        self.set_resizable(False)
+        self.set_resizable(True)
         self.connect("destroy", Gtk.main_quit)
         
         self.config_manager = ConfigManager()
@@ -346,46 +355,67 @@ class ConfigWindow(Gtk.Window):
         header_layout_combo.connect("changed", self.on_combobox_changed, 'window', 'header_layout')
         grid.attach(header_layout_combo, 1, 4, 1, 1)
         
+        # Hide OS name
+        grid.attach(Gtk.Label(label=TR['Hide OS name:']), 0, 5, 1, 1)
+        hide_os_check = Gtk.CheckButton()
+        hide_os_check.set_active(self.config['window'].get('hide_os_name', False))
+        hide_os_check.connect("toggled", self.on_check_toggled, "window", "hide_os_name")
+        grid.attach(hide_os_check, 1, 5, 1, 1)
+        
+        # Hide kernel
+        grid.attach(Gtk.Label(label=TR['Hide kernel:']), 0, 6, 1, 1)
+        hide_kernel_check = Gtk.CheckButton()
+        hide_kernel_check.set_active(self.config['window'].get('hide_kernel', False))
+        hide_kernel_check.connect("toggled", self.on_check_toggled, "window", "hide_kernel")
+        grid.attach(hide_kernel_check, 1, 6, 1, 1)
+        
+        # Hide hostname
+        grid.attach(Gtk.Label(label=TR['Hide hostname:']), 0, 7, 1, 1)
+        hide_hostname_check = Gtk.CheckButton()
+        hide_hostname_check.set_active(self.config['window'].get('hide_hostname', False))
+        hide_hostname_check.connect("toggled", self.on_check_toggled, "window", "hide_hostname")
+        grid.attach(hide_hostname_check, 1, 7, 1, 1)
+        
         # Hide categories text
-        grid.attach(Gtk.Label(label=TR['Hide categories text:']), 0, 5, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide categories text:']), 0, 8, 1, 1)
         hide_cat_text_check = Gtk.CheckButton()
         hide_cat_text_check.set_active(self.config['window'].get('hide_category_text', False))
         hide_cat_text_check.connect("toggled", self.on_checkbox_toggled, 'window', 'hide_category_text')
-        grid.attach(hide_cat_text_check, 1, 5, 1, 1)
+        grid.attach(hide_cat_text_check, 1, 8, 1, 1)
     
         # Icon size
-        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 6, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 9, 1, 1)
         icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         icon_size_spin.set_value(self.config['window'].get('icon_size', 32))
         icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "icon_size")
-        grid.attach(icon_size_spin, 1, 6, 1, 1)
+        grid.attach(icon_size_spin, 1, 9, 1, 1)
     
         # Category icon size
-        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 7, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 10, 1, 1)
         category_icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         category_icon_size_spin.set_value(self.config['window'].get('category_icon_size', 24))
         category_icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "category_icon_size")
-        grid.attach(category_icon_size_spin, 1, 7, 1, 1)
+        grid.attach(category_icon_size_spin, 1, 10, 1, 1)
     
         # Profile pic size
-        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 8, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 11, 1, 1)
         profile_pic_size_spin = Gtk.SpinButton.new_with_range(64, 256, 8)
         profile_pic_size_spin.set_value(self.config['window'].get('profile_pic_size', 128))
         profile_pic_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "profile_pic_size")
-        grid.attach(profile_pic_size_spin, 1, 8, 1, 1)
+        grid.attach(profile_pic_size_spin, 1, 11, 1, 1)
     
         # Profile pic shape - NUEVO
-        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 9, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 12, 1, 1)
         shape_combo = Gtk.ComboBoxText()
         shape_combo.append("square", TR['square'])
         shape_combo.append("circular", TR['circular'])
         current_shape = self.config['window'].get('profile_pic_shape', 'square')
         shape_combo.set_active_id(current_shape)
         shape_combo.connect("changed", self.on_combobox_changed, 'window', 'profile_pic_shape')
-        grid.attach(shape_combo, 1, 9, 1, 1)
+        grid.attach(shape_combo, 1, 12, 1, 1)
     
         # Horizontal alignment
-        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 10, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 13, 1, 1)
         halign_combo = Gtk.ComboBoxText()
         halign_options = ["center", "left", "right"]
         for option in halign_options:
@@ -397,9 +427,14 @@ class ConfigWindow(Gtk.Window):
         except ValueError:
             halign_combo.set_active(0)
         halign_combo.connect("changed", self.on_combo_changed, "window", "halign")
-        grid.attach(halign_combo, 1, 10, 1, 1)
+        grid.attach(halign_combo, 1, 13, 1, 1)
+        
+        # Envolver el grid en un ScrolledWindow
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window
     
-        return grid
         
     def on_check_toggled(self, check_button, category, key):
         """Handle Gtk.CheckButton toggle events and save the state."""
