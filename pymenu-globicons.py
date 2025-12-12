@@ -1118,14 +1118,15 @@ class ArcMenuLauncher(Gtk.Window):
                     break
             
             # Insertar separador y barra de búsqueda
-            main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
+#            main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
+            main_box.pack_start(search_and_buttons_box, False, False, 0)
             main_box.reorder_child(main_box.get_children()[-1], insert_position)
             
             main_box.pack_start(search_and_buttons_box, False, False, 0)
             main_box.reorder_child(main_box.get_children()[-1], insert_position + 1)
         else:
             # Si está abajo (comportamiento original)
-            main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
+#           main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
             main_box.pack_end(search_and_buttons_box, False, False, 0)
         
         self.show_all()
