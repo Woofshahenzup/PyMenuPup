@@ -230,7 +230,8 @@ class ConfigManager:
                 "hide_hostname": False
             },
             "font": {
-                "family": "Sans 12",
+                "family": "Sans",
+                "family_categories": "Sans",
                 "size_categories": 12000,
                 "size_names": 10000,
                 "size_header": 8000
@@ -1278,6 +1279,7 @@ class ArcMenuLauncher(Gtk.Window):
         
         header_font_string = self.config['font']['family']
         header_font_description = Pango.FontDescription.from_string(header_font_string)
+        header_font_description.set_size(self.config['font']['size_header'])
         
         use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
             # ← NUEVA LÍNEA: Obtener alineación del texto
@@ -1615,7 +1617,7 @@ class ArcMenuLauncher(Gtk.Window):
             box.pack_start(icon, False, False, 0)
             
             label = Gtk.Label()
-            font_description = Pango.FontDescription.from_string(self.config['font']['family'])
+            font_description = Pango.FontDescription.from_string(self.config['font'].get('family_categories', self.config['font']['family']))
             font_description.set_size(self.config['font']['size_categories'])
             label.override_font(font_description)
             translated_category = TR.get(category, category)

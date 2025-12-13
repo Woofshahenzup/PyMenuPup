@@ -54,6 +54,7 @@ LANG = {
         'Button background:': 'Button background:',
         'Button text:': 'Button text:',
         'Font family:': 'Font family:',
+        'Category font:': 'Category font:',
         'Category size:': 'Category size:',
         'App name size:': 'App name size:',
         'Header size:': 'Header size:',
@@ -122,6 +123,7 @@ LANG = {
         'Button background:': 'Fondo botón:',
         'Button text:': 'Texto botón:',
         'Font family:': 'Familia de la fuente:',
+        'Category font:': 'Fuente de categorías:',
         'Category size:': 'Tamaño de categorías:',
         'App name size:': 'Tamaño de nombres de apps:',
         'Header size:': 'Tamaño de encabezado:',
@@ -212,6 +214,7 @@ class ConfigManager:
             },
             "font": {
                 "family": "Terminess Nerd Font Propo",
+                "family_categories": "Terminess Nerd Font Propo",
                 "size_categories": 15000,
                 "size_names": 14000,
                 "size_header": 16000
@@ -578,8 +581,17 @@ class ConfigWindow(Gtk.Window):
         grid.attach(Gtk.Label(label=TR['Font family:']), 0, 0, 1, 1)
         font_button = Gtk.FontButton()
         font_button.set_font(self.config['font']['family'])
+        font_button.set_show_size(False)
         font_button.connect("font-set", self.on_font_set, "font", "family")
         grid.attach(font_button, 1, 0, 1, 1)
+        
+        # Nueva opción: Fuente para categorías
+        grid.attach(Gtk.Label(label=TR['Category font:']), 0, 1, 1, 1)
+        category_font_button = Gtk.FontButton()
+        category_font_button.set_font(self.config['font'].get('family_categories', self.config['font']['family']))
+        category_font_button.set_show_size(False)
+        category_font_button.connect("font-set", self.on_font_set, "font", "family_categories")
+        grid.attach(category_font_button, 1, 1, 1, 1)
         
         sizes_to_config = {
             "size_categories": TR['Category size:'],
@@ -587,18 +599,17 @@ class ConfigWindow(Gtk.Window):
             "size_header": TR['Header size:']
         }
         
-        for i, (key, label) in enumerate(sizes_to_config.items(), start=1):
+        for i, (key, label) in enumerate(sizes_to_config.items(), start=2):
             grid.attach(Gtk.Label(label=label), 0, i, 1, 1)
             size_spin = Gtk.SpinButton.new_with_range(5000, 50000, 1000)
             size_spin.set_value(self.config['font'][key])
             size_spin.connect("value-changed", self.on_spin_button_changed, "font", key)
             grid.attach(size_spin, 1, i, 1, 1)
             
-        # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add(grid)
-        return scrolled_window # Devolver el ScrolledWindow
+        return scrolled_window
 
     def create_paths_tab(self):
         grid = Gtk.Grid(row_spacing=10, column_spacing=10)
@@ -765,6 +776,7 @@ class ConfigWindow(Gtk.Window):
     def on_spin_button_changed(self, spin_button, category, key):
         self.config[category][key] = int(spin_button.get_value())
         self.config_manager.save_config(self.config)
+        print(f"DEBUG: Guardado {category}.{key} = {value}")
         
     def on_combo_changed(self, combo, category, key):
         selected_text = combo.get_active_text()
@@ -793,7 +805,12 @@ class ConfigWindow(Gtk.Window):
         self.config_manager.save_config(self.config)
 
     def on_font_set(self, font_button, category, key):
-        self.config[category][key] = font_button.get_font()
+        # Extraer solo la familia de fuente, sin el tamaño
+        font_desc = font_button.get_font()
+        # Separar la familia del tamaño (el tamaño viene al final)
+        parts = font_desc.rsplit(' ', 1)
+        font_family = parts[0] if len(parts) > 0 else font_desc
+        self.config[category][key] = font_family
         self.config_manager.save_config(self.config)
         
     def on_checkbox_toggled(self, button, category, key):
