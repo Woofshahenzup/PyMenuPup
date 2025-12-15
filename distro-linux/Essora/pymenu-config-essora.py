@@ -30,11 +30,15 @@ LANG = {
         'Show window frame:': 'Show window frame:',
         '(No transparency)': '(No transparency)',
         'Hide header:': 'Hide header:',
+        'Hide profile pic:': 'Hide profile pic:',
         'Hide categories text:': 'Hide categories text:',
         'Horizontal alignment:': 'Horizontal alignment:',
+        'Search bar position:': 'Search bar position:',
         'center': 'center',
         'left': 'left',
         'right': 'right',
+        'top': 'top',    
+        'bottom': 'bottom',
         'Hide OS name:': 'Hide OS name:',
         'Hide kernel:': 'Hide kernel:',
         'Hide hostname:': 'Hide hostname:',
@@ -48,6 +52,7 @@ LANG = {
         'Button background:': 'Button background:',
         'Button text:': 'Button text:',
         'Font family:': 'Font family:',
+        'Category font:': 'Category font:',
         'Category size:': 'Category size:',
         'App name size:': 'App name size:',
         'Header size:': 'Header size:',
@@ -67,6 +72,7 @@ LANG = {
         'square': 'Square',
         'circular': 'Circular',
         'Header layout:': 'Header layout:',
+        'Header text alignment:': 'Header text alignment:',
         'Avatar left': 'Avatar left',
         'Avatar right': 'Avatar right',
         'Avatar center': 'Avatar center',
@@ -91,11 +97,15 @@ LANG = {
         'Show window frame:': 'Mostrar marco de ventana:',
         '(No transparency)': '(Sin opacidad)',
         'Hide header:': 'Ocultar encabezado:',
+        'Hide profile pic:': 'Ocultar foto de perfil:',
         'Hide categories text:': 'Ocultar texto de categorías:',
         'Horizontal alignment:': 'Alineación horizontal:',
+        'Search bar position:': 'Posición de barra de búsqueda:',
         'center': 'centro',
         'left': 'izquierda',
         'right': 'derecha',
+        'top': 'arriba',    
+        'bottom': 'abajo',
         'Hide OS name:': 'Ocultar nombre del OS:',
         'Hide kernel:': 'Ocultar kernel:',
         'Hide hostname:': 'Ocultar hostname:',
@@ -109,6 +119,7 @@ LANG = {
         'Button background:': 'Fondo botón:',
         'Button text:': 'Texto botón:',
         'Font family:': 'Familia de la fuente:',
+        'Category font:': 'Fuente de categorías:',
         'Category size:': 'Tamaño de categorías:',
         'App name size:': 'Tamaño de nombres de apps:',
         'Header size:': 'Tamaño de encabezado:',
@@ -129,6 +140,7 @@ LANG = {
         'square': 'Cuadrada',
         'circular': 'Circular',
         'Header layout:': 'Diseño del encabezado:',
+        'Header text alignment:': 'Alineación del texto del encabezado:',
         'Avatar left': 'Avatar izquierda',
         'Avatar right': 'Avatar derecha',
         'Avatar center': 'Avatar centrado',
@@ -178,7 +190,8 @@ class ConfigManager:
                 "width": 700,
                 "height": 850,
                 "decorated_window": False,
-                "hide_header": False,  # Añadido hide_header con valor predeterminado
+                "hide_header": False, 
+                "hide_profile_pic": False,
                 "hide_category_text": False,
                 "halign": "center",
                 "icon_size": 32,
@@ -186,12 +199,15 @@ class ConfigManager:
                 "profile_pic_size": 128,
                 "profile_pic_shape": "square",   
                 "header_layout": "left",
+                "header_text_align": "left",
+                "search_bar_position": "bottom",
                 "hide_os_name": False,
                 "hide_kernel": False,
                 "hide_hostname": False
             },
             "font": {
                 "family": "Terminess Nerd Font Propo",
+                "family_categories": "Terminess Nerd Font Propo",
                 "size_categories": 15000,
                 "size_names": 14000,
                 "size_header": 16000
@@ -344,8 +360,13 @@ class ConfigWindow(Gtk.Window):
         hide_header_check.connect("toggled", self.on_check_toggled, "window", "hide_header")
         grid.attach(hide_header_check, 1, 3, 1, 1)
         
-        # Header layout - NUEVO
-        grid.attach(Gtk.Label(label=TR['Header layout:']), 0, 4, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide profile pic:']), 0, 4, 1, 1)
+        hide_profile_check = Gtk.CheckButton()
+        hide_profile_check.set_active(self.config['window'].get('hide_profile_pic', False))
+        hide_profile_check.connect("toggled", self.on_check_toggled, "window", "hide_profile_pic")
+        grid.attach(hide_profile_check, 1, 4, 1, 1)
+        
+        grid.attach(Gtk.Label(label=TR['Header layout:']), 0, 5, 1, 1)
         header_layout_combo = Gtk.ComboBoxText()
         header_layout_combo.append("left", TR['Avatar left'])
         header_layout_combo.append("center", TR['Avatar center'])
@@ -353,69 +374,80 @@ class ConfigWindow(Gtk.Window):
         current_layout = self.config['window'].get('header_layout', 'left')
         header_layout_combo.set_active_id(current_layout)
         header_layout_combo.connect("changed", self.on_combobox_changed, 'window', 'header_layout')
-        grid.attach(header_layout_combo, 1, 4, 1, 1)
+        grid.attach(header_layout_combo, 1, 5, 1, 1)
+        
+        # Header text alignment
+        grid.attach(Gtk.Label(label=TR['Header text alignment:']), 0, 6, 1, 1)
+        header_text_align_combo = Gtk.ComboBoxText()
+        header_text_align_combo.append("left", TR['left'])
+        header_text_align_combo.append("center", TR['center'])
+        header_text_align_combo.append("right", TR['right'])
+        current_text_align = self.config['window'].get('header_text_align', 'left')
+        header_text_align_combo.set_active_id(current_text_align)
+        header_text_align_combo.connect("changed", self.on_combobox_changed, 'window', 'header_text_align')
+        grid.attach(header_text_align_combo, 1, 6, 1, 1)    
         
         # Hide OS name
-        grid.attach(Gtk.Label(label=TR['Hide OS name:']), 0, 5, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide OS name:']), 0, 7, 1, 1)
         hide_os_check = Gtk.CheckButton()
         hide_os_check.set_active(self.config['window'].get('hide_os_name', False))
         hide_os_check.connect("toggled", self.on_check_toggled, "window", "hide_os_name")
-        grid.attach(hide_os_check, 1, 5, 1, 1)
+        grid.attach(hide_os_check, 1, 7, 1, 1)
         
         # Hide kernel
-        grid.attach(Gtk.Label(label=TR['Hide kernel:']), 0, 6, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide kernel:']), 0, 8, 1, 1)
         hide_kernel_check = Gtk.CheckButton()
         hide_kernel_check.set_active(self.config['window'].get('hide_kernel', False))
         hide_kernel_check.connect("toggled", self.on_check_toggled, "window", "hide_kernel")
-        grid.attach(hide_kernel_check, 1, 6, 1, 1)
+        grid.attach(hide_kernel_check, 1, 8, 1, 1)
         
         # Hide hostname
-        grid.attach(Gtk.Label(label=TR['Hide hostname:']), 0, 7, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide hostname:']), 0, 9, 1, 1)
         hide_hostname_check = Gtk.CheckButton()
         hide_hostname_check.set_active(self.config['window'].get('hide_hostname', False))
         hide_hostname_check.connect("toggled", self.on_check_toggled, "window", "hide_hostname")
-        grid.attach(hide_hostname_check, 1, 7, 1, 1)
+        grid.attach(hide_hostname_check, 1, 9, 1, 1)
         
         # Hide categories text
-        grid.attach(Gtk.Label(label=TR['Hide categories text:']), 0, 8, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Hide categories text:']), 0, 10, 1, 1)
         hide_cat_text_check = Gtk.CheckButton()
         hide_cat_text_check.set_active(self.config['window'].get('hide_category_text', False))
         hide_cat_text_check.connect("toggled", self.on_checkbox_toggled, 'window', 'hide_category_text')
-        grid.attach(hide_cat_text_check, 1, 8, 1, 1)
+        grid.attach(hide_cat_text_check, 1, 10, 1, 1)
     
         # Icon size
-        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 9, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 11, 1, 1)
         icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         icon_size_spin.set_value(self.config['window'].get('icon_size', 32))
         icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "icon_size")
-        grid.attach(icon_size_spin, 1, 9, 1, 1)
+        grid.attach(icon_size_spin, 1, 11, 1, 1)
     
         # Category icon size
-        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 10, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 12, 1, 1)
         category_icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         category_icon_size_spin.set_value(self.config['window'].get('category_icon_size', 24))
         category_icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "category_icon_size")
-        grid.attach(category_icon_size_spin, 1, 10, 1, 1)
+        grid.attach(category_icon_size_spin, 1, 12, 1, 1)
     
         # Profile pic size
-        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 11, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 13, 1, 1)
         profile_pic_size_spin = Gtk.SpinButton.new_with_range(64, 256, 8)
         profile_pic_size_spin.set_value(self.config['window'].get('profile_pic_size', 128))
         profile_pic_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "profile_pic_size")
-        grid.attach(profile_pic_size_spin, 1, 11, 1, 1)
+        grid.attach(profile_pic_size_spin, 1, 13, 1, 1)
     
         # Profile pic shape - NUEVO
-        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 12, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 14, 1, 1)
         shape_combo = Gtk.ComboBoxText()
         shape_combo.append("square", TR['square'])
         shape_combo.append("circular", TR['circular'])
         current_shape = self.config['window'].get('profile_pic_shape', 'square')
         shape_combo.set_active_id(current_shape)
         shape_combo.connect("changed", self.on_combobox_changed, 'window', 'profile_pic_shape')
-        grid.attach(shape_combo, 1, 12, 1, 1)
+        grid.attach(shape_combo, 1, 14, 1, 1)
     
         # Horizontal alignment
-        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 13, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 15, 1, 1)
         halign_combo = Gtk.ComboBoxText()
         halign_options = ["center", "left", "right"]
         for option in halign_options:
@@ -427,7 +459,17 @@ class ConfigWindow(Gtk.Window):
         except ValueError:
             halign_combo.set_active(0)
         halign_combo.connect("changed", self.on_combo_changed, "window", "halign")
-        grid.attach(halign_combo, 1, 13, 1, 1)
+        grid.attach(halign_combo, 1, 15, 1, 1)
+        
+        # Search bar position
+        grid.attach(Gtk.Label(label=TR['Search bar position:']), 0, 16, 1, 1)
+        searchbar_combo = Gtk.ComboBoxText()
+        searchbar_combo.append("top", TR['top'])
+        searchbar_combo.append("bottom", TR['bottom'])
+        current_searchbar = self.config['window'].get('search_bar_position', 'bottom')
+        searchbar_combo.set_active_id(current_searchbar)
+        searchbar_combo.connect("changed", self.on_combobox_changed, 'window', 'search_bar_position')
+        grid.attach(searchbar_combo, 1, 16, 1, 1)        
         
         # Envolver el grid en un ScrolledWindow
         scrolled_window = Gtk.ScrolledWindow()
@@ -517,8 +559,17 @@ class ConfigWindow(Gtk.Window):
         grid.attach(Gtk.Label(label=TR['Font family:']), 0, 0, 1, 1)
         font_button = Gtk.FontButton()
         font_button.set_font(self.config['font']['family'])
+        font_button.set_show_size(False)
         font_button.connect("font-set", self.on_font_set, "font", "family")
         grid.attach(font_button, 1, 0, 1, 1)
+        
+        # Nueva opción: Fuente para categorías
+        grid.attach(Gtk.Label(label=TR['Category font:']), 0, 1, 1, 1)
+        category_font_button = Gtk.FontButton()
+        category_font_button.set_font(self.config['font'].get('family_categories', self.config['font']['family']))
+        category_font_button.set_show_size(False)
+        category_font_button.connect("font-set", self.on_font_set, "font", "family_categories")
+        grid.attach(category_font_button, 1, 1, 1, 1)
         
         sizes_to_config = {
             "size_categories": TR['Category size:'],
@@ -526,14 +577,17 @@ class ConfigWindow(Gtk.Window):
             "size_header": TR['Header size:']
         }
         
-        for i, (key, label) in enumerate(sizes_to_config.items(), start=1):
+        for i, (key, label) in enumerate(sizes_to_config.items(), start=2):
             grid.attach(Gtk.Label(label=label), 0, i, 1, 1)
             size_spin = Gtk.SpinButton.new_with_range(5000, 50000, 1000)
             size_spin.set_value(self.config['font'][key])
             size_spin.connect("value-changed", self.on_spin_button_changed, "font", key)
             grid.attach(size_spin, 1, i, 1, 1)
             
-        return grid
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.add(grid)
+        return scrolled_window
 
     def create_paths_tab(self):
         grid = Gtk.Grid(row_spacing=10, column_spacing=10)
@@ -724,7 +778,12 @@ class ConfigWindow(Gtk.Window):
         self.config_manager.save_config(self.config)
 
     def on_font_set(self, font_button, category, key):
-        self.config[category][key] = font_button.get_font()
+        # Extraer solo la familia de fuente, sin el tamaño
+        font_desc = font_button.get_font()
+        # Separar la familia del tamaño (el tamaño viene al final)
+        parts = font_desc.rsplit(' ', 1)
+        font_family = parts[0] if len(parts) > 0 else font_desc
+        self.config[category][key] = font_family
         self.config_manager.save_config(self.config)
         
     def on_checkbox_toggled(self, button, category, key):

@@ -11,6 +11,8 @@ import json
 import urllib.parse
 import locale
 import cairo
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # === 🌍 Diccionario de Traducción ===
 LANG = {
@@ -189,8 +191,10 @@ class ConfigManager:
                 "height": 567,
                 "decorated_window": False,
                 "hide_header": False,
+                "hide_profile_pic": False,
                 "halign": "center",
                 "icon_size": 32,
+                "category_icon_size": 16,
                 "profile_pic_size": 64,
                 "hide_category_text": False,
                 "category_icon_size": 16,
@@ -202,6 +206,7 @@ class ConfigManager:
             },
             "font": {
                 "family": "Terminess Nerd Font Propo Bold 16",
+                "family_categories": "Terminess Nerd Font Propo Bold 16",
                 "size_categories": 14000,
                 "size_names": 12000,
                 "size_header": 12000
@@ -597,16 +602,22 @@ class JWMMenuParser:
         return programs
     
     def get_fallback_applications(self):
-        """Fallback applications if JWM parsing fails"""
-        return {
-            'System': [
-                {'Name': 'Terminal', 'Exec': 'lxterminal', 'Icon': 'terminal', 'Comment': 'Terminal emulator', 'Terminal': False, 'Categories': []},
-                {'Name': 'File Manager', 'Exec': 'rox', 'Icon': 'folder', 'Comment': 'File manager', 'Terminal': False, 'Categories': []},
-            ],
-            'Internet': [
-                {'Name': 'Firefox', 'Exec': 'firefox', 'Icon': 'firefox', 'Comment': 'Web browser', 'Terminal': False, 'Categories': []},
-            ]
-        }
+            """Fallback applications if JWM parsing fails (Extended Version)"""
+            return {
+                'System': [
+                    {'Name': 'Terminal', 'Exec': 'lxterminal', 'Icon': 'terminal', 'Comment': 'Default terminal emulator', 'Terminal': True, 'Categories': ['System', 'Utility']},
+                    {'Name': 'File Manager', 'Exec': 'rox', 'Icon': 'system-file-manager', 'Comment': 'Simple file manager', 'Terminal': False, 'Categories': ['System', 'Utility']},
+                    {'Name': 'Task Manager', 'Exec': 'htop', 'Icon': 'utilities-system-monitor', 'Comment': 'Process monitor (requires terminal)', 'Terminal': True, 'Categories': ['System', 'Utility']},
+                ],
+                'Internet': [
+                    {'Name': 'Firefox', 'Exec': 'firefox', 'Icon': 'firefox', 'Comment': 'Web browser', 'Terminal': False, 'Categories': ['Internet', 'Network']},
+                    {'Name': 'Email Client', 'Exec': 'thunderbird', 'Icon': 'mail-unread', 'Comment': 'Email client', 'Terminal': False, 'Categories': ['Internet', 'Network']},
+                ],
+                'Settings': [
+                    {'Name': 'PyMenu Config', 'Exec': 'python3 /usr/local/essora-kit/pymenu-config-ESSORA.py', 'Icon': 'preferences-system', 'Comment': 'Open PyMenu Configurator', 'Terminal': False, 'Categories': ['Settings', 'Utility']},
+                    {'Name': 'Display Settings', 'Exec': 'arandr', 'Icon': 'preferences-desktop-display', 'Comment': 'Configure resolution and monitors', 'Terminal': False, 'Categories': ['Settings', 'Hardware']},
+                ]
+            }
 
 class ArcMenuLauncher(Gtk.Window):
     def __init__(self, icon_size=None, jwm_file=None, x=None, y=None):
@@ -978,23 +989,25 @@ class ArcMenuLauncher(Gtk.Window):
             """Cierra la ventana cuando pierde el foco, a menos que se esté redimensionando."""
             if not self.is_resizing and not self.context_menu_active:
                 Gtk.main_quit()
-            return False
-                    
+            return False                    
+
     def create_interface(self):
         """Create the main interface"""
+        # [Configuración inicial de la caja principal]
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         main_box.get_style_context().add_class('menu-window')
         self.add(main_box)
         top_spacer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        top_spacer.set_size_request(-1, 2)  # 20 píxeles de altura
+        top_spacer.set_size_request(-1, 2)
         main_box.pack_start(top_spacer, False, False, 0)
     
+        # [Header (opcional)]
         if not self.config['window'].get('hide_header', False):
             header_box = self.create_header()
             main_box.pack_start(header_box, False, False, 0)
-            
             main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
-  
+        
+        # [Contenido principal (Categorías y Aplicaciones)]
         content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         main_box.pack_start(content_box, True, True, 0)
     
@@ -1002,77 +1015,106 @@ class ArcMenuLauncher(Gtk.Window):
         content_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL), False, False, 0)
         content_box.pack_start(self.create_applications_area(), True, True, 0)
     
-        main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
+        # --- INICIO: Creación de la barra de búsqueda y botones ---
     
-        bottom_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        bottom_box.set_margin_top(4)
-        bottom_box.set_margin_bottom(4)
-        bottom_box.set_margin_start(4)
-        bottom_box.set_margin_end(4)
+        # Creamos la caja de búsqueda y botones (que el código anterior llamaba bottom_box)
+        search_and_buttons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        search_and_buttons_box.set_margin_top(4)
+        search_and_buttons_box.set_margin_bottom(4)
+        search_and_buttons_box.set_margin_start(4)
+        search_and_buttons_box.set_margin_end(4)
     
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.get_style_context().add_class('search-box')
-        
         self.search_entry.set_placeholder_text(TR['Search applications...'])
         self.search_entry.connect("search-changed", self.on_search_changed)
         self.search_entry.set_size_request(200, 10)
         self.search_entry.set_can_focus(True)
         self.search_entry.set_tooltip_text(TR['Search applications...'])
-        bottom_box.pack_start(self.search_entry, True, True, 0)
+        search_and_buttons_box.pack_start(self.search_entry, True, True, 0)
+    
+        # Nota: Usamos icon_size = self.config['window'].get('icon_size', 16) una sola vez si es posible
+        icon_size = self.config['window'].get('icon_size', 16)
         
-        # ---- Botón de apagado ----
-        shutdown_button = Gtk.Button()
-        shutdown_button.get_style_context().add_class('action-button') 
-        shutdown_button.set_size_request(30, 5)  # NUEVA LÍNEA - tamaño fijo
-        icon_path = self.find_icon_path("exit")
-        icon_size = self.config['window'].get('icon_size', 16)  
-        if icon_path:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 20, 20)
-            shutdown_icon = Gtk.Image.new_from_pixbuf(pixbuf)
-        else:
-            shutdown_icon = Gtk.Image.new_from_icon_name("system-shutdown", Gtk.IconSize.SMALL_TOOLBAR)        
-        shutdown_button.add(shutdown_icon)
-        shutdown_button.set_tooltip_text(TR['Shutdown'])
-        shutdown_button.connect("clicked", self.on_shutdown_clicked)
-        bottom_box.pack_end(shutdown_button, False, False, 0)
-        
-        # ---- Nuevo botón de navegador ----
-        browser_button = Gtk.Button()
-        browser_button.get_style_context().add_class('action-button') 
-        browser_button.set_size_request(30, 5)  # NUEVA LÍNEA - tamaño fijo
-        icon_path = self.find_icon_path("web-browser")
-        icon_size = self.config['window'].get('icon_size', 16)        
-        if icon_path:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 20, 20)
-            browser_icon = Gtk.Image.new_from_pixbuf(pixbuf)
-        else:
-            browser_icon = Gtk.Image.new_from_icon_name("applications-internet", Gtk.IconSize.SMALL_TOOLBAR)       
-        browser_button.add(browser_icon)
-        browser_button.set_tooltip_text(TR['Search in the web'])
-        browser_button.connect("clicked", self.on_browser_search_clicked)
-        bottom_box.pack_end(browser_button, False, False, 0)
-        
-        # ---- Botón de configuración ----
+        # Botón de configuración
         config_button = Gtk.Button()
         config_button.get_style_context().add_class('action-button')
-        browser_button.get_style_context().add_class('action-button') 
-        config_button.set_size_request(30, 5)  # NUEVA LÍNEA - tamaño fijo
+        config_button.set_size_request(30, 5)
         icon_path = self.find_icon_path("preferences-system")
-        icon_size = self.config['window'].get('icon_size', 16)       
         if icon_path:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 20, 20)
             config_icon = Gtk.Image.new_from_pixbuf(pixbuf)
         else:
             config_icon = Gtk.Image.new_from_icon_name("preferences-system", Gtk.IconSize.SMALL_TOOLBAR)
-        
         config_button.add(config_icon)
         config_button.set_tooltip_text(TR['Pymenu config'])
         config_button.connect("clicked", self.on_config_clicked)
-        bottom_box.pack_end(config_button, False, False, 0)
-
+        search_and_buttons_box.pack_end(config_button, False, False, 0)
+    
+        # Nuevo botón de navegador
+        browser_button = Gtk.Button()
+        browser_button.get_style_context().add_class('action-button')
+        browser_button.set_size_request(30, 5)
+        icon_path = self.find_icon_path("web-browser")
+        if icon_path:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 20, 20)
+            browser_icon = Gtk.Image.new_from_pixbuf(pixbuf)
+        else:
+            browser_icon = Gtk.Image.new_from_icon_name("applications-internet", Gtk.IconSize.SMALL_TOOLBAR)
+        browser_button.add(browser_icon)
+        browser_button.set_tooltip_text(TR['Search in the web'])
+        browser_button.connect("clicked", self.on_browser_search_clicked)
+        search_and_buttons_box.pack_end(browser_button, False, False, 0)
+    
+        # Botón de apagado
+        shutdown_button = Gtk.Button()
+        shutdown_button.get_style_context().add_class('action-button')
+        shutdown_button.set_size_request(30, 5)
+        icon_path = self.find_icon_path("exit")
+        if icon_path:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 20, 20)
+            shutdown_icon = Gtk.Image.new_from_pixbuf(pixbuf)
+        else:
+            shutdown_icon = Gtk.Image.new_from_icon_name("system-shutdown", Gtk.IconSize.SMALL_TOOLBAR)
+        shutdown_button.add(shutdown_icon)
+        shutdown_button.set_tooltip_text(TR['Shutdown'])
+        shutdown_button.connect("clicked", self.on_shutdown_clicked)
+        search_and_buttons_box.pack_end(shutdown_button, False, False, 0)
         
-        main_box.pack_end(bottom_box, False, False, 0)
+        # --- FIN: Creación de la barra de búsqueda y botones ---
+    
+        # === LÓGICA DE POSICIÓN DE LA BARRA DE BÚSQUEDA ===
+        search_position = self.config['window'].get('search_bar_position', 'bottom')
         
+        if search_position == 'top':
+            # 1. Encontrar dónde insertar: justo antes de content_box
+            main_box_children = main_box.get_children()
+            insert_position = 0
+            
+            for i, child in enumerate(main_box_children):
+                if child == content_box:
+                    insert_position = i
+                    break
+            
+            # 2. Insertar la barra de búsqueda (search_and_buttons_box)
+            # pack_start la añade al final. Luego reorder_child la mueve.
+            main_box.pack_start(search_and_buttons_box, False, False, 0)
+            main_box.reorder_child(main_box.get_children()[-1], insert_position)
+            
+            # 3. Agregar separador después de la barra de búsqueda
+            separator_top = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            main_box.pack_start(separator_top, False, False, 0)
+            main_box.reorder_child(main_box.get_children()[-1], insert_position + 1)
+    
+        else:
+            # Si está abajo ('bottom' o cualquier otro valor)
+            # 1. Agregar el separador que va ANTES de la barra de búsqueda
+            main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
+            
+            # 2. Agregar la caja de búsqueda y botones al final
+            main_box.pack_end(search_and_buttons_box, False, False, 0)
+        
+        # [Finalización]
         self.show_all()
         GLib.timeout_add(100, self.delayed_focus_grab)
         
@@ -1083,154 +1125,193 @@ class ArcMenuLauncher(Gtk.Window):
         return False  # Don't repeat the timeout        
 
     def create_header(self):
-        """Create the top header with profile picture, OS, kernel, and hostname"""
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-        header_box.set_margin_top(1)
-        header_box.set_margin_bottom(1)
-        header_box.set_margin_start(5)
-        header_box.set_margin_end(5)
-    
-        # === CREAR EL PERFIL ===
-        profile_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        profile_box.set_valign(Gtk.Align.CENTER)
+            """Create the top header with profile picture, OS, kernel, and hostname"""
+            header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            header_box.set_margin_top(1)
+            header_box.set_margin_bottom(1)
+            header_box.set_margin_start(5)
+            header_box.set_margin_end(5)
+            hide_profile = self.config['window'].get('hide_profile_pic', False)
         
-        profile_button = Gtk.Button()
-        profile_button.set_relief(Gtk.ReliefStyle.NONE)
-        profile_button.get_style_context().add_class('profile-button') 
-        
-        if self.config['window'].get('profile_pic_shape', 'square') == 'circular':
-            profile_button.get_style_context().add_class('profile-circular-style')
-        
-        self.profile_image = Gtk.Image()
-        profile_button.add(self.profile_image)
-        self.profile_image.set_halign(Gtk.Align.CENTER)
-        self.profile_image.set_valign(Gtk.Align.CENTER)
-        
-        def load_profile_image():
-            profile_pic_path = self.config['paths']['profile_pic']
-            profile_pic_size = self.config['window'].get('profile_pic_size', 128)
-            profile_pic_shape = self.config['window'].get('profile_pic_shape', 'square')
+            # === CREAR EL MAPEO DE ALINEACIÓN (CORRECCIÓN CLAVE) ===
+            align_map = {
+                'left': Gtk.Align.START,
+                'center': Gtk.Align.CENTER,
+                'right': Gtk.Align.END
+            }
+            align_str = self.config['window'].get('header_text_align', 'left')
+            gtk_align = align_map.get(align_str, Gtk.Align.START)
             
-            try:
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(profile_pic_path, profile_pic_size, profile_pic_size, True)
+            # === CREAR EL PERFIL ===
+            profile_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            profile_box.set_valign(Gtk.Align.CENTER)
+            
+            profile_button = Gtk.Button()
+            profile_button.set_relief(Gtk.ReliefStyle.NONE)
+            profile_button.get_style_context().add_class('profile-button') 
+            
+            if self.config['window'].get('profile_pic_shape', 'square') == 'circular':
+                profile_button.get_style_context().add_class('profile-circular-style')
+            
+            self.profile_image = Gtk.Image()
+            profile_button.add(self.profile_image)
+            self.profile_image.set_halign(Gtk.Align.CENTER)
+            self.profile_image.set_valign(Gtk.Align.CENTER)
+            
+            def load_profile_image():
+                profile_pic_path = self.config['paths']['profile_pic']
+                profile_pic_size = self.config['window'].get('profile_pic_size', 128)
+                profile_pic_shape = self.config['window'].get('profile_pic_shape', 'square')
                 
-                if profile_pic_shape == 'circular':
-                    pixbuf = apply_circular_mask(pixbuf)
+                try:
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(profile_pic_path, profile_pic_size, profile_pic_size, True)
                     
-                self.profile_image.set_from_pixbuf(pixbuf)
-                
-            except Exception as e:
-                print(f"Failed to load profile picture: {e}")
-                self.profile_image.set_from_icon_name("avatar-default", Gtk.IconSize.DIALOG)
-        
-        load_profile_image()
-    
-        def on_profile_clicked(button):
-            try:
-                GLib.timeout_add(100, lambda: Gtk.main_quit())
-                profile_manager_path = self.config['paths']['profile_manager']
-                if os.path.exists(profile_manager_path):
-                    subprocess.Popen(['sudo', profile_manager_path],
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
+                    if profile_pic_shape == 'circular':
+                        pixbuf = apply_circular_mask(pixbuf)
+                        
+                    self.profile_image.set_from_pixbuf(pixbuf)
+                    
+                except Exception as e:
+                    print(f"Failed to load profile picture: {e}")
+                    self.profile_image.set_from_icon_name("avatar-default", Gtk.IconSize.DIALOG)
+            
+            load_profile_image()
+            
+            def on_profile_clicked(button):
+                try:
+                    GLib.timeout_add(100, lambda: Gtk.main_quit())
+                    profile_manager_path = self.config['paths']['profile_manager']
+                    if os.path.exists(profile_manager_path):
+                        subprocess.Popen(['sudo', profile_manager_path],
+                                         stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+                    else:
+                        subprocess.Popen(['sudo', "python3", profile_manager_path], 
+                                         stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+                    print(f"Launching Profile Manager: {profile_manager_path}")
+                except Exception as e:
+                    print(f"Error opening Profile Manager: {e}")
+            
+            profile_button.set_tooltip_text(TR["Select avatar"])
+            profile_button.connect("clicked", on_profile_clicked)
+            profile_box.pack_start(profile_button, False, False, 0)
+            
+            # === CREAR LA INFO DEL SISTEMA ===
+            system_info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+            system_info_box.set_valign(Gtk.Align.CENTER)
+            
+            # CORRECCIÓN: Alineamos la caja contenedora de la info del sistema (importante para 'center'/'right')
+            system_info_box.set_halign(gtk_align)
+            
+            os_name, kernel = self.get_os_info()
+            hostname = self.get_hostname()
+            
+            header_font_description = Pango.FontDescription(self.config['font']['family'])
+            header_font_description.set_size(self.config['font']['size_header'])
+            
+            use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
+            
+            # OS Label - solo mostrar si no está oculto
+            if not self.config['window'].get('hide_os_name', False):
+                os_label = Gtk.Label()
+                if use_gtk_theme:
+                    os_label.set_markup(f'<b>{os_name}</b>')
                 else:
-                    subprocess.Popen(['sudo', "python3", profile_manager_path], 
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
-                print(f"Launching Profile Manager: {profile_manager_path}")
-            except Exception as e:
-                print(f"Error opening Profile Manager: {e}")
-        
-        profile_button.set_tooltip_text(TR["Select avatar"])
-        profile_button.connect("clicked", on_profile_clicked)
-        profile_box.pack_start(profile_button, False, False, 0)
-        
-        # === CREAR LA INFO DEL SISTEMA ===
-        system_info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        system_info_box.set_valign(Gtk.Align.CENTER)
-        
-        os_name, kernel = self.get_os_info()
-        hostname = self.get_hostname()
-        
-        header_font_string = self.config['font']['family']
-        header_font_description = Pango.FontDescription.from_string(header_font_string)
-        
-        use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
-        
-        # OS Label - solo mostrar si no está oculto
-        if not self.config['window'].get('hide_os_name', False):
-            os_label = Gtk.Label()
-            if use_gtk_theme:
-                os_label.set_markup(f'<b>{os_name}</b>')
-            else:
-                os_label.set_markup(f'<span color="{self.config["colors"]["text_header_os"]}"><b>{os_name}</b></span>')
-            os_label.override_font(header_font_description)
-            os_label.set_halign(Gtk.Align.START)
-            os_label.set_ellipsize(3)
-            os_label.set_max_width_chars(30)
-            system_info_box.pack_start(os_label, False, False, 0)
-        
-        # Kernel Label - solo mostrar si no está oculto
-        if not self.config['window'].get('hide_kernel', False):
-            kernel_label = Gtk.Label()
-            if use_gtk_theme:
-                kernel_label.set_markup(f'🐧 {kernel}')
-            else:
-                kernel_label.set_markup(f'<span color="{self.config["colors"]["text_header_kernel"]}">🐧 {kernel}</span>')
-            kernel_label.override_font(header_font_description)
-            kernel_label.set_halign(Gtk.Align.START)
-            kernel_label.set_ellipsize(3)
-            kernel_label.set_max_width_chars(30)
-            system_info_box.pack_start(kernel_label, False, False, 0)
-        
-        # Hostname Label - solo mostrar si no está oculto
-        if not self.config['window'].get('hide_hostname', False):
-            hostname_label = Gtk.Label()
-            if use_gtk_theme:
-                hostname_label.set_markup(f'💻 {hostname}')
-            else:
-                hostname_label.set_markup(f'<span color="{self.config["colors"]["text_header_hostname"]}">💻 {hostname}</span>')
-            hostname_label.override_font(header_font_description)
-            hostname_label.set_halign(Gtk.Align.START)
-            hostname_label.set_ellipsize(3)
-            hostname_label.set_max_width_chars(30)
-            system_info_box.pack_start(hostname_label, False, False, 0)
-        
-        # === APLICAR EL LAYOUT SEGÚN CONFIGURACIÓN ===
-        header_layout = self.config['window'].get('header_layout', 'left')
-        
-        if header_layout == 'right':
-            # Avatar a la derecha, info a la izquierda
-            header_box.pack_start(system_info_box, True, True, 0)
-            header_box.pack_start(profile_box, False, False, 0)
-        elif header_layout == 'center':
-            # Avatar centrado con info del sistema a ambos lados
-            left_spacer = Gtk.Box()
-            right_spacer = Gtk.Box()
+                    os_label.set_markup(f'<span color="{self.config["colors"]["text_header_os"]}"><b>{os_name}</b></span>')
+                os_label.override_font(header_font_description)
+                # CORRECCIÓN: Aplicar la alineación a la etiqueta
+                os_label.set_halign(gtk_align) 
+                os_label.set_ellipsize(3)
+                os_label.set_max_width_chars(30)
+                system_info_box.pack_start(os_label, False, False, 0)
             
-            header_box.pack_start(left_spacer, True, True, 0)
-            header_box.pack_start(profile_box, False, False, 0)
-            header_box.pack_start(right_spacer, True, True, 0)
+            # Kernel Label - solo mostrar si no está oculto
+            if not self.config['window'].get('hide_kernel', False):
+                kernel_label = Gtk.Label()
+                if use_gtk_theme:
+                    kernel_label.set_markup(f'🐧 {kernel}')
+                else:
+                    kernel_label.set_markup(f'<span color="{self.config["colors"]["text_header_kernel"]}">🐧 {kernel}</span>')
+                kernel_label.override_font(header_font_description)
+                # CORRECCIÓN: Aplicar la alineación a la etiqueta
+                kernel_label.set_halign(gtk_align) 
+                kernel_label.set_ellipsize(3)
+                kernel_label.set_max_width_chars(30)
+                system_info_box.pack_start(kernel_label, False, False, 0)
             
-            # Agregar la info del sistema al espaciador izquierdo
-            system_info_box.set_halign(Gtk.Align.START)
-            left_spacer.pack_start(system_info_box, False, False, 0)
-        else:
-            # Avatar a la izquierda, info a la derecha (layout original)
-            header_box.pack_start(profile_box, False, False, 0)
-            header_box.pack_start(system_info_box, True, True, 0)
-        
-        # Monitor de cambios en el archivo de perfil
-        profile_file = Gio.File.new_for_path(self.config['paths']['profile_pic'])
-        monitor = profile_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
-        
-        def on_file_changed(monitor, file, other_file, event_type):
-            if event_type in (Gio.FileMonitorEvent.CHANGED, Gio.FileMonitorEvent.CREATED):
-                GLib.idle_add(load_profile_image)
-        
-        monitor.connect("changed", on_file_changed)
-        
-        return header_box
+            # Hostname Label - solo mostrar si no está oculto
+            if not self.config['window'].get('hide_hostname', False):
+                hostname_label = Gtk.Label()
+                if use_gtk_theme:
+                    hostname_label.set_markup(f'💻 {hostname}')
+                else:
+                    hostname_label.set_markup(f'<span color="{self.config["colors"]["text_header_hostname"]}">💻 {hostname}</span>')
+                hostname_label.override_font(header_font_description)
+                # CORRECCIÓN: Aplicar la alineación a la etiqueta
+                hostname_label.set_halign(gtk_align) 
+                hostname_label.set_ellipsize(3)
+                hostname_label.set_max_width_chars(30)
+                system_info_box.pack_start(hostname_label, False, False, 0)
+            
+            # === APLICAR EL LAYOUT SEGÚN CONFIGURACIÓN ===
+            header_layout = self.config['window'].get('header_layout', 'left')
+            
+            if hide_profile:
+                # Si el perfil está oculto, solo mostrar info del sistema
+                header_box.pack_start(system_info_box, True, True, 0)
+            elif header_layout == 'right':
+                # Avatar a la derecha, info a la izquierda
+                header_box.pack_start(system_info_box, True, True, 0)
+                header_box.pack_start(profile_box, False, False, 0)
+            elif header_layout == 'center':
+                # Avatar centrado con info del sistema a ambos lados
+                left_spacer = Gtk.Box()
+                right_spacer = Gtk.Box()
+                
+                header_box.pack_start(left_spacer, True, True, 0)
+                header_box.pack_start(profile_box, False, False, 0)
+                header_box.pack_start(right_spacer, True, True, 0)
+                
+                # NOTA: Aunque el system_info_box tiene halign aplicado arriba, 
+                # esta línea lo sobreescribe a START si se usa el diseño 'center'.
+                # La quitamos para que use la configuración general.
+                # system_info_box.set_halign(Gtk.Align.START) 
+                
+                # En lugar de usar left_spacer para el system_info_box, 
+                # lo empaquetamos directamente en el header_box si queremos que use 
+                # el espacio disponible, o lo colocamos en el left_spacer si queremos
+                # que esté a la izquierda del perfil.
+                
+                # Vamos a mantener la lógica que tenía, pero confiando en el halign de system_info_box.
+                # system_info_box se empaquetará en left_spacer solo si queremos que esté a la izquierda del avatar.
+                if align_str == 'left':
+                     # Si el texto es 'left', tiene sentido empaquetarlo a la izquierda del avatar
+                     left_spacer.pack_start(system_info_box, False, False, 0)
+                else:
+                     # Si es 'center' o 'right', la lógica de espaciadores de 'center' ya lo centrará
+                     # y el set_halign del system_info_box se encargará de alinear el texto dentro.
+                     header_box.pack_start(system_info_box, True, True, 0) # Empaquetar en el header_box para que use todo el espacio.
+                     # Si se empaqueta aquí, hay que eliminar los spacers.
+                     # Lo mejor es confiar en los spacers y el set_halign:
+                     pass # Mantener la lógica de los spacers
+                     
+            else:
+                # Avatar a la izquierda, info a la derecha (layout original/por defecto)
+                header_box.pack_start(profile_box, False, False, 0)
+                header_box.pack_start(system_info_box, True, True, 0)
+            
+            # Monitor de cambios en el archivo de perfil
+            profile_file = Gio.File.new_for_path(self.config['paths']['profile_pic'])
+            monitor = profile_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
+            
+            def on_file_changed(monitor, file, other_file, event_type):
+                if event_type in (Gio.FileMonitorEvent.CHANGED, Gio.FileMonitorEvent.CREATED):
+                    GLib.idle_add(load_profile_image)
+            
+            monitor.connect("changed", on_file_changed)
+            
+            return header_box
 
     def create_categories_sidebar(self):
         """Create categories sidebar with improved hover functionality"""
@@ -1304,68 +1385,78 @@ class ArcMenuLauncher(Gtk.Window):
         return scrolled
     
     def add_category_row(self, category, icon_name):
-        """Add a category row with hover events"""
-        row = Gtk.ListBoxRow()
-        event_box = Gtk.EventBox()
-        event_box.set_above_child(True)
-        
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
-        box.set_property("margin-left", 2)
-        box.set_property("margin-right", 1)
-        box.set_property("margin-top", 2)
-        box.set_property("margin-bottom", 2)
-        
-        icon_path = self.find_icon_path(icon_name)
-        if icon_path:
+            """Add a category row with hover events"""
+            row = Gtk.ListBoxRow()
+            event_box = Gtk.EventBox()
+            event_box.set_above_child(True)
+            
+            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=1)
+            box.set_property("margin-left", 2)
+            box.set_property("margin-right", 1)
+            box.set_property("margin-top", 2)
+            box.set_property("margin-bottom", 2)
+            
+            # OBTENER EL TAMAÑO DESDE LA CONFIGURACIÓN (CORRECCIÓN PARCIALMENTE HECHA)
             category_icon_size = self.config['window'].get('category_icon_size', 24)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, category_icon_size, category_icon_size)
-            icon = Gtk.Image.new_from_pixbuf(pixbuf)
-        else:
-            icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
-        
-        # --- LÓGICA DE VISIBILIDAD DE ICONO Y TEXTO ---
-        if self.config['window'].get('hide_category_text', False):
-            # Crear un contenedor específico para centrar el icono
-            center_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-            center_box.set_homogeneous(False)
             
-            # Tres secciones: vacía - icono - vacía
-            left_spacer = Gtk.Box()
-            right_spacer = Gtk.Box()
-            
-            center_box.pack_start(left_spacer, True, True, 0)
-            center_box.pack_start(icon, False, False, 0)
-            center_box.pack_start(right_spacer, True, True, 0)
-            
-            box.pack_start(center_box, True, True, 0)
-            row.set_tooltip_text(TR.get(category, category))
-        else:
-            # Si el texto es visible, usar el diseño normal sin center_box
-            box.pack_start(icon, False, False, 0)
-            
-            label = Gtk.Label()
-            font_description = Pango.FontDescription(self.config['font']['family'])
-            font_description.set_size(self.config['font']['size_categories'])
-            label.override_font(font_description)
-            translated_category = TR.get(category, category)
-            use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
-            if use_gtk_theme:
-                label.set_markup(f"{translated_category}")
+            icon_path = self.find_icon_path(icon_name)
+            if icon_path:
+                # Lógica para iconos encontrados como archivos (Correcto)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, category_icon_size, category_icon_size)
+                icon = Gtk.Image.new_from_pixbuf(pixbuf)
             else:
-                label.set_markup(f"<span foreground='{self.config['colors']['text_normal']}'>{translated_category}</span>")
-            label.set_halign(Gtk.Align.START)
-            box.pack_start(label, True, True, 5)
-        
-        event_box.add(box)
-        row.add(event_box)
-        row.category_name = category
-        
-        event_box.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
-        event_box.connect("enter-notify-event", lambda w, e: self.on_category_hover_enter(row, e))
-        event_box.connect("leave-notify-event", lambda w, e: self.on_category_hover_leave(row, e))
-        
-        self.categories_listbox.add(row)
-        row.show_all()
+                # Lógica para iconos cargados por nombre (Necesita set_pixel_size)
+                icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.MENU)
+                # --- INSERCIÓN DE CORRECCIÓN ---
+                # Aplicar el tamaño en píxeles, ya que Gtk.IconSize.MENU es fijo.
+                icon.set_pixel_size(category_icon_size)
+                # -------------------------------
+                
+            # --- LÓGICA DE VISIBILIDAD DE ICONO Y TEXTO ---
+            if self.config['window'].get('hide_category_text', False):
+                # Crear un contenedor específico para centrar el icono
+                center_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+                center_box.set_homogeneous(False)
+                
+                # Tres secciones: vacía - icono - vacía
+                left_spacer = Gtk.Box()
+                right_spacer = Gtk.Box()
+                
+                center_box.pack_start(left_spacer, True, True, 0)
+                center_box.pack_start(icon, False, False, 0)
+                center_box.pack_start(right_spacer, True, True, 0)
+                
+                box.pack_start(center_box, True, True, 0)
+                row.set_tooltip_text(TR.get(category, category))
+            else:
+                # Si el texto es visible, usar el diseño normal sin center_box
+                box.pack_start(icon, False, False, 0)
+                
+                label = Gtk.Label()
+                font_description = Pango.FontDescription.from_string(self.config['font'].get('family_categories', self.config['font']['family']))
+                font_description.set_size(self.config['font']['size_categories'])
+                label.override_font(font_description)
+                translated_category = TR.get(category, category)
+                # Se ha traducido dos veces en su código, lo mantengo, aunque no es necesario
+                translated_category = TR.get(category, category) 
+                use_gtk_theme = self.config['colors'].get('use_gtk_theme', False)
+                if use_gtk_theme:
+                    label.set_markup(f"{translated_category}")
+                else:
+                    label.set_markup(f"<span foreground='{self.config['colors']['text_normal']}'>{translated_category}</span>")
+                label.set_halign(Gtk.Align.START)
+                box.pack_start(label, True, True, 5)
+            
+            event_box.add(box)
+            row.add(event_box)
+            row.category_name = category
+            
+            event_box.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+            event_box.connect("enter-notify-event", lambda w, e: self.on_category_hover_enter(row, e))
+            event_box.connect("leave-notify-event", lambda w, e: self.on_category_hover_leave(row, e))
+            
+            self.categories_listbox.add(row)
+            row.show_all()
     
     def get_row_category(self, row):
         """Get category name from row"""
