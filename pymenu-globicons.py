@@ -14,150 +14,28 @@ import locale
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-# === 🌍 Diccionario de Traducción ===
-LANG = {
-    'en': {
-        'Search applications...': 'Search applications...',
-        'Shutdown': 'Shutdown',
-        'Search in the web': 'Search in the web',
-        'Pymenu config': 'Pymenu config',
-        'Select avatar': 'Select avatar',
-        'Terminal': 'Terminal',
-        'Terminal emulator': 'Terminal emulator',
-        'File Manager': 'File Manager',
-        'File manager': 'File manager',
-        'Firefox': 'Firefox',
-        'Web browser': 'Web browser',
-        'DownloadsDir': 'Downloads',
-        'MusicDir': 'Music',
-        'VideosDir': 'Videos',
-        'PicturesDir': 'Pictures',
-         'DocumentsDir': 'Documents',
-        'Open directory:': 'Open directory:',
-        'Social Networks': 'Social Networks',
-        'Hide social networks:': 'Hide social networks:',
-        # Categorías
-        'Desktop': 'Desktop',
-        'System': 'System',
-        'Setup': 'Setup',
-        'Utility': 'Utility',
-        'Filesystem': 'Filesystem',
-        'Graphic': 'Graphic',
-        'Document': 'Document',
-        'Business': 'Business',
-        'Personal': 'Personal',
-        'Network': 'Network',
-        'Internet': 'Internet',
-        'Multimedia': 'Multimedia',
-        'Fun': 'Fun',
-        'Help': 'Help',
-         'Rectify': 'Rectify',
-         'Shutdown': 'Shutdown',
-         'Run': 'Run',
-        'Create desktop shortcut': 'Create desktop shortcut',
-        'Leave': 'Leave'
-    },
-    'es': {
-        'Search applications...': 'Buscar aplicaciones...',
-        'Shutdown': 'Apagar',
-        'Search in the web': 'Buscar en la web',
-        'Pymenu config': 'Configurar Pymenu',
-        'Select avatar': 'Seleccione avatar',
-        'Terminal': 'Terminal',
-        'Terminal emulator': 'Emulador de terminal',
-        'File Manager': 'Gestor de Archivos',
-        'File manager': 'Gestor de archivos',
-        'Firefox': 'Firefox',
-        'Web browser': 'Navegador web',
-        'DownloadsDir': 'Descargas',
-        'MusicDir': 'Música',
-        'VideosDir': 'Videos',
-         'DocumentsDir': 'Documentos',
-        'PicturesDir': 'Imágenes', # El nombre estándar en Español es 'Imágenes' o 'Imgs'
-        'Open directory:': 'Abrir directorio:',
-        'Social Networks': 'Redes Sociales', 
-        'Hide social networks:': 'Ocultar redes sociales:',
-        # Categorías
-        'Desktop': 'Escritorio',
-        'System': 'Sistema',
-        'Setup': 'Configuración',
-        'Utility': 'Utilidades',
-        'Utility': 'Herramientas',
-        'Filesystem': 'Archivos',
-        'Graphic': 'Gráficos',
-        'Document': 'Documentos',
-        'Business': 'Oficina',
-        'Business': 'Negocios',
-        'Personal': 'Personal',
-        'Network': 'Red',
-        'Internet': 'Internet',
-        'Multimedia': 'Multimedia',
-        'Fun': 'Juegos',
-        'Fun': 'Diversión',
-        'Rectify': 'Rectificar',
-        'Help': 'Ayuda',
-        'Shutdown': 'Apagar',
-        'Run': 'Ejecutar', 
-        'Create desktop shortcut': 'Crear acceso en escritorio',
-        'Leave': 'Salir'
-    }
-}
+# === 🌍 Sistema de Traducción ===
+try:
+    sys.path.insert(0, '/usr/local/bin')
+    from pymenupuplang import TranslationManager
+except ModuleNotFoundError:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "pymenupuplang", 
+        "/usr/local/bin/pymenupuplang.py"
+    )
+    if spec and spec.loader:
+        pymenupuplang = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pymenupuplang)
+        TranslationManager = pymenupuplang.TranslationManager
+    else:
+        print("ERROR: No se pudo cargar pymenupuplang.py")
+        sys.exit(1)
 
-# Mapeo de categorías traducidas a nombres estándar
-CATEGORY_MAP = {
-    # Español a Inglés
-    'Escritorio': 'Desktop',
-    'Sistema': 'System', 
-    'Configuración': 'Setup',
-    'Utilidades': 'Utility',
-    'Herramientas': 'Utility',
-    'Archivos': 'Filesystem',
-    'Sistema de Archivos': 'Filesystem',
-    'Gráficos': 'Graphic',
-    'Documentos': 'Document',
-    'Oficina': 'Business',
-    'Negocios': 'Business',
-    'Personal': 'Personal',
-    'Red': 'Network',
-    'Redes': 'Network',
-    'Internet': 'Internet',
-    'Multimedia': 'Multimedia',
-    'Juegos': 'Fun',
-    'Diversión': 'Fun',
-    'Ayuda': 'Help',
-    'Salir': 'Leave',
-     'Rectificar': 'Rectify',
-     'Apagar': 'Shutdown',
-    # Mantener nombres en inglés también
-    'Desktop': 'Desktop',
-    'System': 'System',
-    'Setup': 'Setup',
-    'Utility': 'Utility',
-    'Filesystem': 'Filesystem',
-    'Graphic': 'Graphic',
-    'Document': 'Document',
-    'Business': 'Business',
-    'Personal': 'Personal',
-    'Network': 'Network',
-    'Internet': 'Internet',
-    'Multimedia': 'Multimedia',
-    'Fun': 'Fun',
-    'Help': 'Help',
-     'Rectify': 'Rectify',
-     'Shutdown': 'Shutdown',
-    'Leave': 'Leave'
-}
+TR = TranslationManager()
 
-# === 🌐 Detectar idioma del sistema ===
-def get_translation_texts():
-    try:
-        sys_locale = locale.getlocale()
-        lang_code = sys_locale[0].split('_')[0] if sys_locale[0] else 'en'
-        return LANG.get(lang_code, LANG['en'])
-    except Exception:
-        return LANG['en']
-
-TR = get_translation_texts()
+# Generar CATEGORY_MAP automáticamente desde archivos .lang
+CATEGORY_MAP = TR.get_category_map()
 
 # Import the pango module using GObject Introspection
 gi.require_version('Pango', '1.0')

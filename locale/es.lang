@@ -1,0 +1,140 @@
+# ============================================
+# PyMenuPup - Traducción al Español
+# Archivo: /usr/share/locale/pymenupup/es.lang
+# ============================================
+
+# === Ventana Principal ===
+PyMenuPup Configurator = Configurador de PyMenuPup
+Window = Ventana
+Colors = Colores
+Font = Fuente
+Paths = Rutas
+Categories = Categorías
+Save = Guardar
+Exit = Salir
+
+# === Mensajes del Sistema ===
+Config file not found. Creating default config. = Archivo de configuración no encontrado. Creando configuración predeterminada.
+Error loading config file: = Error al cargar el archivo de configuración:
+Using default config. = Usando la configuración predeterminada.
+Config saved (without closing). = Configuración guardada (sin cerrar).
+An error occurred: = Ocurrió un error:
+
+# === GUI Principal (pymenu-globicons.py) ===
+Search applications... = Buscar aplicaciones...
+Shutdown = Apagar
+Search in the web = Buscar en la web
+Pymenu config = Configurar Pymenu
+Select avatar = Seleccione avatar
+Terminal = Terminal
+Terminal emulator = Emulador de terminal
+File Manager = Gestor de Archivos
+File manager = Gestor de archivos
+Firefox = Firefox
+Web browser = Navegador web
+Run = Ejecutar
+Create desktop shortcut = Crear acceso en escritorio
+
+# === Directorios del Usuario ===
+DownloadsDir = Descargas
+MusicDir = Música
+VideosDir = Videos
+PicturesDir = Imágenes
+DocumentsDir = Documentos
+Open directory: = Abrir directorio:
+
+# === Redes Sociales ===
+Social Networks = Redes Sociales
+Hide social networks: = Ocultar redes sociales:
+
+# === Opciones de Ventana ===
+Window width: = Ancho de ventana:
+Window height: = Alto de ventana:
+Icon size: = Tamaño de los iconos:
+Category icon size: = Tamaño de iconos de categorías:
+Profile pic size: = Tamaño de foto de perfil:
+Profile pic shape: = Forma de foto de perfil:
+Show window frame: = Mostrar marco de ventana:
+(No transparency) = (Sin opacidad)
+
+# === Opciones de Visibilidad ===
+Hide header: = Ocultar encabezado:
+Hide profile picture: = Ocultar foto de perfil:
+Hide quick access: = Ocultar accesos rápidos:
+Hide social networks: = Ocultar redes sociales:
+Hide categories text: = Ocultar texto de categorías:
+Hide app names: = Ocultar nombres de apps:
+Hide OS name: = Ocultar nombre del OS:
+Hide kernel: = Ocultar kernel:
+Hide hostname: = Ocultar hostname:
+
+# === Diseño del Encabezado ===
+Header layout: = Diseño del encabezado:
+Header text alignment: = Alineación del texto del encabezado:
+Avatar left = Avatar izquierda
+Avatar right = Avatar derecha
+Avatar center = Avatar centrado
+
+# === Formas y Posiciones ===
+square = Cuadrada
+circular = Circular
+top = Arriba
+bottom = Abajo
+center = centro
+left = izquierda
+right = derecha
+
+# === Alineación ===
+Horizontal alignment: = Alineación horizontal:
+Search bar position: = Posición de barra de búsqueda:
+
+# === Colores ===
+Use system theme: = Usar tema del sistema:
+Background color: = Fondo:
+Border color: = Borde:
+Categories background: = Fondo de categorías:
+Text normal: = Texto categoría:
+Header (OS): = Encabezado (OS):
+Header (Kernel): = Encabezado (Kernel):
+Header (Hostname): = Encabezado (Hostname):
+Hover background: = Fondo al pasar el ratón:
+Button background: = Fondo botón:
+Button text: = Texto botón:
+
+# === Fuentes ===
+Font family: = Familia de la fuente:
+Category font: = Fuente de categorías:
+Category size: = Tamaño de categorías:
+App name size: = Tamaño de nombres de apps:
+Header size: = Tamaño de encabezado:
+
+# === Rutas ===
+Profile pic path: = Foto de perfil:
+Profile manager: = Gestor de perfil:
+Shutdown command: = Comando de apagado:
+JWM Tray config: = Configuración JWM Tray:
+Tint2 config: = Configuración Tint2:
+Use Tint2 (instead of JWM): = Usar Tint2 (en lugar de JWM):
+
+# === Categorías ===
+Excluded categories: = Categorías excluidas:
+Select categories to hide from menu = Selecciona categorías para ocultar del menú
+
+# === Nombres de Categorías ===
+Desktop = Escritorio
+System = Sistema
+Setup = Configuración
+Utility = Utilidad
+Filesystem = Sistema de archivos
+Graphic = Gráfico
+Document = Documentos
+Business = Negocios
+Personal = Personal
+Network = Red
+Internet = Internet
+Multimedia = Multimedia
+Fun = Entretenimiento
+Help = Ayuda
+Rectify = Rectificar
+Shutdown = Apagar
+Leave = Salir

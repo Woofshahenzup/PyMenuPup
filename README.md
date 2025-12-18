@@ -64,7 +64,77 @@ Graphical configuration tool to customize the menu.
 - GTK system theme integration
 
 ---
- 
+
+## 🌍 Translation System
+
+PyMenuPup uses a simple, user-friendly translation system based on `.lang` files. No need for complex tools like `poedit` or `gettext`.
+
+### How It Works
+
+Translations are stored in plain text files with a simple `key = value` format:
+```
+# Example: /usr/share/locale/pymenupup/es.lang
+Search applications... = Buscar aplicaciones...
+Shutdown = Apagar
+Desktop = Escritorio
+```
+
+### Translation Files Location
+
+Translation files are searched in order of priority:
+
+1. `~/.config/pymenupup/locale/` - User overrides (highest priority)
+2. `/usr/local/share/locale/pymenupup/` - Local installation
+3. `/usr/share/locale/pymenupup/` - System-wide
+
+### Supported Languages
+
+- **English (en)** - Built-in (no file needed)
+- **Spanish (es)** - `es.lang` included
+- **French (fr)** - `fr.lang` included
+
+### Creating a New Translation
+
+To translate PyMenuPup to your language:
+
+1. Copy the English or Spanish `.lang` file:
+```bash
+sudo cp /usr/share/locale/pymenupup/es.lang /usr/share/locale/pymenupup/YOUR_LANG.lang
+```
+
+2. Edit the file with any text editor:
+```bash
+sudo nano /usr/share/locale/pymenupup/YOUR_LANG.lang
+```
+
+3. Translate the values (right side of `=`):
+```
+# Before
+Search applications... = Buscar aplicaciones...
+
+# After (example: German)
+Search applications... = Anwendungen suchen...
+```
+
+4. Save and restart PyMenuPup
+
+**That's it!** No need to modify any Python code.
+
+### Regional Variants
+
+You can create regional variants like:
+- `es-MX.lang` (Spanish - Mexico)
+- `es-AR.lang` (Spanish - Argentina)
+- `fr-CA.lang` (French - Canada)
+- `pt-BR.lang` (Portuguese - Brazil)
+
+The system automatically falls back to the base language if a regional variant is not found.
+
+### Category Name Mapping
+
+The translation system automatically handles category names in JWM menus. If your JWM has categories in your language (e.g., "Bureau" in French), PyMenuPup will automatically map them to the standard English names internally while displaying them in your language.
+
+--- 
 
 ## Distribution Variants
 
@@ -176,7 +246,14 @@ sudo chmod +x /usr/local/bin/pymenu-globicons.py
 sudo chmod +x /usr/local/bin/pymenu-config.py
 ```
 
-3. Create symbolic links (optional):
+3. Copy translation files:
+```bash
+sudo mkdir -p /usr/share/locale/pymenupup
+sudo cp locale/*.lang /usr/share/locale/pymenupup/
+sudo chmod 644 /usr/share/locale/pymenupup/*.lang
+```
+
+4. Create symbolic links (optional):
 ```bash
 sudo ln -s /usr/local/bin/pymenu-globicons.py /usr/local/bin/pymenu
 sudo ln -s /usr/local/bin/pymenu-config.py /usr/local/bin/pymenu-config
@@ -388,17 +465,38 @@ Or from the main menu, click on the configuration icon.
 ---
 
 ## File Structure
-
 ```
 PyMenuPup/
 ├── pymenu-globicons.py      # Main menu
 ├── pymenu-config.py          # GTK configurator
+├── pymenupuplang.py          # Translation system
+├── locale/
+│   ├── es.lang              # Spanish translation
+│   └── fr.lang              # French translation
 ├── README.md                 # This file
 ├── README-es.md              # Spanish version
 ├── TECHNICAL.md              # Technical documentation (English)
 ├── TECHNICAL-es.md           # Technical documentation (Spanish)
 ├── LICENSE                   # GPL License
 └── screenshots/              # Screenshots (optional)
+```
+
+### Installation Paths
+```
+/usr/local/bin/
+├── pymenu-globicons.py       # Main menu executable
+├── pymenu-config.py          # Configurator executable
+└── pymenupuplang.py          # Translation module
+
+/usr/share/locale/pymenupup/
+├── es.lang                   # Spanish translation
+└── fr.lang                   # French translation
+
+~/.config/pymenupup/
+├── pymenu.json              # Main configuration
+└── locale/                  # User custom translations (optional)
+    └── es-custom.lang
+
 ```
 
 ### User Configuration Files

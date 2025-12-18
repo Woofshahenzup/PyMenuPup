@@ -1,0 +1,140 @@
+# ============================================
+# PyMenuPup - Traduction en Français
+# Archivo: /usr/share/locale/pymenupup/fr.lang
+# ============================================
+
+# === Fenêtre Principale ===
+PyMenuPup Configurator = Configurateur PyMenuPup
+Window = Fenêtre
+Colors = Couleurs
+Font = Police
+Paths = Chemins
+Categories = Catégories
+Save = Enregistrer
+Exit = Quitter
+
+# === Messages du Système ===
+Config file not found. Creating default config. = Fichier de configuration introuvable. Création de la configuration par défaut.
+Error loading config file: = Erreur lors du chargement du fichier de configuration:
+Using default config. = Utilisation de la configuration par défaut.
+Config saved (without closing). = Configuration enregistrée (sans fermer).
+An error occurred: = Une erreur s'est produite:
+
+# === GUI Principale (pymenu-globicons.py) ===
+Search applications... = Rechercher des applications...
+Shutdown = Éteindre
+Search in the web = Rechercher sur le web
+Pymenu config = Configurer Pymenu
+Select avatar = Sélectionner l'avatar
+Terminal = Terminal
+Terminal emulator = Émulateur de terminal
+File Manager = Gestionnaire de Fichiers
+File manager = Gestionnaire de fichiers
+Firefox = Firefox
+Web browser = Navigateur web
+Run = Exécuter
+Create desktop shortcut = Créer un raccourci sur le bureau
+
+# === Répertoires de l'Utilisateur ===
+DownloadsDir = Téléchargements
+MusicDir = Musique
+VideosDir = Vidéos
+PicturesDir = Images
+DocumentsDir = Documents
+Open directory: = Ouvrir le répertoire:
+
+# === Réseaux Sociaux ===
+Social Networks = Réseaux Sociaux
+Hide social networks: = Masquer les réseaux sociaux:
+
+# === Options de Fenêtre ===
+Window width: = Largeur de la fenêtre:
+Window height: = Hauteur de la fenêtre:
+Icon size: = Taille des icônes:
+Category icon size: = Taille des icônes de catégories:
+Profile pic size: = Taille de la photo de profil:
+Profile pic shape: = Forme de la photo de profil:
+Show window frame: = Afficher le cadre de la fenêtre:
+(No transparency) = (Pas de transparence)
+
+# === Options de Visibilité ===
+Hide header: = Masquer l'en-tête:
+Hide profile picture: = Masquer la photo de profil:
+Hide quick access: = Masquer l'accès rapide:
+Hide social networks: = Masquer les réseaux sociaux:
+Hide categories text: = Masquer le texte des catégories:
+Hide app names: = Masquer les noms des applications:
+Hide OS name: = Masquer le nom du système:
+Hide kernel: = Masquer le noyau:
+Hide hostname: = Masquer le nom d'hôte:
+
+# === Disposition de l'En-tête ===
+Header layout: = Disposition de l'en-tête:
+Header text alignment: = Alignement du texte de l'en-tête:
+Avatar left = Avatar à gauche
+Avatar right = Avatar à droite
+Avatar center = Avatar centré
+
+# === Formes et Positions ===
+square = Carré
+circular = Circulaire
+top = Haut
+bottom = Bas
+center = centre
+left = gauche
+right = droite
+
+# === Alignement ===
+Horizontal alignment: = Alignement horizontal:
+Search bar position: = Position de la barre de recherche:
+
+# === Couleurs ===
+Use system theme: = Utiliser le thème du système:
+Background color: = Couleur de fond:
+Border color: = Couleur de la bordure:
+Categories background: = Fond des catégories:
+Text normal: = Texte normal:
+Header (OS): = En-tête (Système):
+Header (Kernel): = En-tête (Noyau):
+Header (Hostname): = En-tête (Nom d'hôte):
+Hover background: = Fond au survol:
+Button background: = Fond du bouton:
+Button text: = Texte du bouton:
+
+# === Polices ===
+Font family: = Famille de police:
+Category font: = Police des catégories:
+Category size: = Taille des catégories:
+App name size: = Taille des noms d'applications:
+Header size: = Taille de l'en-tête:
+
+# === Chemins ===
+Profile pic path: = Chemin de la photo de profil:
+Profile manager: = Gestionnaire de profil:
+Shutdown command: = Commande d'arrêt:
+JWM Tray config: = Configuration JWM Tray:
+Tint2 config: = Configuration Tint2:
+Use Tint2 (instead of JWM): = Utiliser Tint2 (au lieu de JWM):
+
+# === Catégories ===
+Excluded categories: = Catégories exclues:
+Select categories to hide from menu = Sélectionnez les catégories à masquer du menu
+
+# === Noms de Catégories ===
+Desktop = Bureau
+System = Système
+Setup = Configuration
+Utility = Utilitaire
+Filesystem = Système de fichiers
+Graphic = Graphique
+Document = Documents
+Business = Bureautique
+Personal = Personnel
+Network = Réseau
+Internet = Internet
+Multimedia = Multimédia
+Fun = Divertissement
+Help = Aide
+Rectify = Rectifier
+Shutdown = Éteindre
+Leave = Quitter

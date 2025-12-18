@@ -9,178 +9,27 @@ import locale
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-# === 🌍 Diccionario de Traducción ===
-LANG = {
-    'en': {
-        'PyMenu Configurator': 'PyMenu Configurator',
-        'Window': 'Window',
-        'Colors': 'Colors',
-        'Font': 'Font',
-        'Paths': 'Paths',
-        'Save': 'Save',
-        'Exit': 'Exit',
-        'Config file not found. Creating default config.': 'Config file not found. Creating default config.',
-        'Error loading config file:': 'Error loading config file:',
-        'Using default config.': 'Using default config.',
-        'Window width:': 'Window width:',
-        'Window height:': 'Window height:',
-        'Icon size:': 'Icon size:',
-        'Category icon size:': 'Category icon size:',
-        'Profile pic shape:': 'Profile pic shape:',  
-        'square': 'Square',                          
-        'circular': 'Circular', 
-        'Profile pic size:': 'Profile pic size:',
-        'Show window frame:': 'Show window frame:',
-        '(No transparency)': '(No transparency)',
-        'Hide header:': 'Hide header:',
-        'Hide profile picture:': 'Hide profile picture:',
-        'Hide quick access:': 'Hide quick access:',
-        'Hide social networks:': 'Hide social networks:',
-        'Hide categories text:': 'Hide categories text:',
-        'Hide app names:': 'Hide app names:',
-        'Horizontal alignment:': 'Horizontal alignment:',
-        'Search bar position:': 'Search bar position:',
-        'top': 'Top',
-        'bottom': 'Bottom',
-        'center': 'center',
-        'left': 'left',
-        'right': 'right',
-        'Background color:': 'Background color:',
-        'Border color:': 'Border color:',
-        'Text normal:': 'Normal text:',
-        'Header (OS):': 'Header (OS):',
-        'Header (Kernel):': 'Header (Kernel):',
-        'Header (Hostname):': 'Header (Hostname):',
-        'Hover background:': 'Hover background:',
-        'Button background:': 'Button background:',
-        'Button text:': 'Button text:',
-        'Font family:': 'Font family:',
-        'Category font:': 'Category font:',
-        'Category size:': 'Category size:',
-        'App name size:': 'App name size:',
-        'Header size:': 'Header size:',
-        'Profile pic path:': 'Profile pic path:',
-        'Profile manager:': 'Profile manager:',
-        'Shutdown command:': 'Shutdown command:',
-        'JWM Tray config:': 'JWM Tray config:',               
-        'Tint2 config:': 'Tint2 config:',                     
-        'Use Tint2 (instead of JWM):': 'Use Tint2 (instead of JWM):',
-        'Config saved (without closing).': 'Config saved (without closing).',
-        'An error occurred:': 'An error occurred:',
-        'Categories': 'Categories',
-        'Excluded categories:': 'Excluded categories:',
-        'Select categories to hide from menu': 'Select categories to hide from menu',
-        'Header layout:': 'Header layout:',
-        'Header text alignment:': 'Header text alignment:',
-        'Avatar left': 'Avatar left',
-        'Avatar right': 'Avatar right',
-        'Avatar center': 'Avatar center',
-        'Use system theme:': 'Use system theme:',
-        'Hide OS name:': 'Hide OS name:',
-        'Hide kernel:': 'Hide kernel:',
-        'Hide hostname:': 'Hide hostname:',
-        'Categories background:': 'Categories background:'
-    },
-    'es': {
-        'PyMenu Configurator': 'Configurador de PyMenu',
-        'Window': 'Ventana',
-        'Colors': 'Colores',
-        'Font': 'Fuente',
-        'Paths': 'Rutas',
-        'Save': 'Guardar',
-        'Exit': 'Salir',
-        'Config file not found. Creating default config.': 'Archivo de configuración no encontrado. Creando configuración predeterminada.',
-        'Error loading config file:': 'Error al cargar el archivo de configuración:',
-        'Using default config.': 'Usando la configuración predeterminada.',
-        'Window width:': 'Ancho de ventanta:',
-        'Window height:': 'Alto de ventanta:',
-        'Icon size:': 'Tamaño de los iconos:',
-        'Category icon size:': 'Tamaño de iconos de categorías:',
-        'Profile pic size:': 'Tamaño de foto de perfil:',
-        'Profile pic shape:': 'Forma de foto de perfil:',  
-        'square': 'Cuadrada',                          
-        'circular': 'Circular', 
-        'Show window frame:': 'Mostrar marco de ventana:',
-        '(No transparency)': '(Sin opacidad)',
-        'Hide header:': 'Ocultar encabezado:',
-        'Hide profile picture:': 'Ocultar foto de perfil:',
-        'Hide quick access:': 'Ocultar accesos rápidos:',
-        'Hide social networks:': 'Ocultar redes sociales:',
-        'Hide categories text:': 'Ocultar texto de categorías:',
-        'Hide app names:': 'Ocultar nombres de apps:',
-        'Horizontal alignment:': 'Alineación horizontal:',
-        'Search bar position:': 'Posición de barra de búsqueda:',
-        'top': 'Arriba',                                           
-        'bottom': 'Abajo', 
-        'center': 'centro',
-        'left': 'izquierda',
-        'right': 'derecha',
-        'Background color:': 'Fondo:',
-        'Border color:': 'Borde:',
-        'Text normal:': 'Texto categoria:',
-        'Header (OS):': 'Encabezado (OS):',
-        'Header (Kernel):': 'Encabezado (Kernel):',
-        'Header (Hostname):': 'Encabezado (Hostname):',
-        'Hover background:': 'Fondo al pasar el ratón:',
-        'Button background:': 'Fondo botón:',
-        'Button text:': 'Texto botón:',
-        'Font family:': 'Familia de la fuente:',
-        'Category font:': 'Fuente de categorías:',
-        'Category size:': 'Tamaño de categorías:',
-        'App name size:': 'Tamaño de nombres de apps:',
-        'Header size:': 'Tamaño de encabezado:',
-        'Profile pic path:': 'Foto de perfil:',
-        'Profile manager:': 'Gestor de perfil:',
-        'Shutdown command:': 'Comando de apagado:',
-        'JWM Tray config:': 'Configuración JWM Tray:',        
-        'Tint2 config:': 'Configuración Tint2:',              
-        'Use Tint2 (instead of JWM):': 'Usar Tint2 (en lugar de JWM):',
-        'Config saved (without closing).': 'Configuración guardada (sin cerrar).',
-        'An error occurred:': 'Ocurrió un error:',
-        'Categories': 'Categorías',
-        'Excluded categories:': 'Categorías excluidas:',
-        'Use system theme:': 'Usar tema del sistema:',
-        'Select categories to hide from menu': 'Selecciona categorías para ocultar del menú',
-        'Header layout:': 'Diseño del encabezado:',
-        'Header text alignment:': 'Alineación del texto del encabezado:',
-        'Avatar left': 'Avatar izquierda',
-        'Avatar right': 'Avatar derecha',
-        'Avatar center': 'Avatar centrado',
-        'Hide OS name:': 'Ocultar nombre del OS:',
-        'Hide kernel:': 'Ocultar kernel:',
-        'Hide hostname:': 'Ocultar hostname:',
-        'Categories background:': 'Fondo de categorías:',
-                # Nuevas traducciones para las categorías
-        'Desktop': 'Escritorio',
-        'System': 'Sistema',
-        'Setup': 'Configuración',
-        'Utility': 'Utilidad',
-        'Filesystem': 'Sistema de archivos',
-        'Graphic': 'Gráfico',
-        'Document': 'Documentos',
-        'Business': 'Negocios',
-        'Personal': 'Personal',
-        'Network': 'Red',
-        'Internet': 'Internet',
-        'Multimedia': 'Multimedia', # La misma palabra en español
-        'Fun': 'Entretenimiento',
-        'Help': 'Ayuda',
-        'Rectify': 'Rectificar',
-        'Shutdown': 'Apagar',
-        'Leave': 'Salir'
-    }
-}
+# === 🌍 Sistema de Traducción ===
+# Método alternativo de importación
+try:
+    sys.path.insert(0, '/usr/local/bin')
+    from pymenupuplang import TranslationManager
+except ModuleNotFoundError:
+    # Si falla, cargar directamente el archivo
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "pymenupuplang", 
+        "/usr/local/bin/pymenupuplang.py"
+    )
+    if spec and spec.loader:
+        pymenupuplang = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pymenupuplang)
+        TranslationManager = pymenupuplang.TranslationManager
+    else:
+        print("ERROR: No se pudo cargar pymenupuplang.py")
+        sys.exit(1)
 
-# === 🌍 Detectar idioma del sistema ===
-def get_translation_texts():
-    try:
-        sys_locale = locale.getlocale()
-        lang_code = sys_locale[0].split('_')[0] if sys_locale[0] else 'en'
-        return LANG.get(lang_code, LANG['en'])
-    except Exception:
-        return LANG['en']
-
-TR = get_translation_texts()
+TR = TranslationManager()
 
 CONFIG_FILE = "/root/.config/pymenu.json"
 

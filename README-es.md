@@ -58,6 +58,77 @@ Herramienta gráfica de configuración para personalizar el menú.
 
 ---
 
+## 🌍 Sistema de Traducción
+
+PyMenuPup utiliza un sistema de traducción simple y amigable basado en archivos `.lang`. No necesitas herramientas complejas como `poedit` o `gettext`.
+
+### Cómo Funciona
+
+Las traducciones se almacenan en archivos de texto plano con un formato simple `clave = valor`:
+```
+# Ejemplo: /usr/share/locale/pymenupup/es.lang
+Search applications... = Buscar aplicaciones...
+Shutdown = Apagar
+Desktop = Escritorio
+```
+
+### Ubicación de Archivos de Traducción
+
+Los archivos de traducción se buscan en orden de prioridad:
+
+1. `~/.config/pymenupup/locale/` - Personalizaciones del usuario (mayor prioridad)
+2. `/usr/local/share/locale/pymenupup/` - Instalación local
+3. `/usr/share/locale/pymenupup/` - A nivel de sistema
+
+### Idiomas Soportados
+
+- **Inglés (en)** - Incorporado (no necesita archivo)
+- **Español (es)** - `es.lang` incluido
+- **Francés (fr)** - `fr.lang` incluido
+
+### Crear una Nueva Traducción
+
+Para traducir PyMenuPup a tu idioma:
+
+1. Copia el archivo `.lang` en inglés o español:
+```bash
+sudo cp /usr/share/locale/pymenupup/es.lang /usr/share/locale/pymenupup/TU_IDIOMA.lang
+```
+
+2. Edita el archivo con cualquier editor de texto:
+```bash
+sudo nano /usr/share/locale/pymenupup/TU_IDIOMA.lang
+```
+
+3. Traduce los valores (lado derecho del `=`):
+```
+# Antes
+Search applications... = Buscar aplicaciones...
+
+# Después (ejemplo: Alemán)
+Search applications... = Anwendungen suchen...
+```
+
+4. Guarda y reinicia PyMenuPup
+
+**¡Eso es todo!** No necesitas modificar ningún código Python.
+
+### Variantes Regionales
+
+Puedes crear variantes regionales como:
+- `es-MX.lang` (Español - México)
+- `es-AR.lang` (Español - Argentina)
+- `fr-CA.lang` (Francés - Canadá)
+- `pt-BR.lang` (Portugués - Brasil)
+
+El sistema automáticamente recurre al idioma base si no encuentra una variante regional.
+
+### Mapeo de Nombres de Categorías
+
+El sistema de traducción maneja automáticamente los nombres de categorías en los menús JWM. Si tu JWM tiene categorías en tu idioma (ej. "Bureau" en francés), PyMenuPup las mapeará automáticamente a los nombres estándar en inglés internamente mientras las muestra en tu idioma.
+
+---
+
 ## Variantes de Distribución
 
 PyMenuPup tiene diferentes versiones optimizadas para distintos entornos Linux:
@@ -168,7 +239,14 @@ sudo chmod +x /usr/local/bin/pymenu-globicons.py
 sudo chmod +x /usr/local/bin/pymenu-config.py
 ```
 
-3. Crea enlaces simbólicos (opcional):
+3. Copia los archivos de traducción:
+```bash
+sudo mkdir -p /usr/share/locale/pymenupup
+sudo cp locale/*.lang /usr/share/locale/pymenupup/
+sudo chmod 644 /usr/share/locale/pymenupup/*.lang
+```
+
+4. Crea enlaces simbólicos (opcional):
 ```bash
 sudo ln -s /usr/local/bin/pymenu-globicons.py /usr/local/bin/pymenu
 sudo ln -s /usr/local/bin/pymenu-config.py /usr/local/bin/pymenu-config
@@ -382,17 +460,38 @@ O desde el menú principal, haz clic en el icono de configuración.
 ---
 
 ## Estructura de Archivos
-
 ```
 PyMenuPup/
 ├── pymenu-globicons.py      # Menú principal
 ├── pymenu-config.py          # Configurador GTK
+├── pymenupuplang.py          # Sistema de traducción
+├── locale/
+│   ├── es.lang              # Traducción español
+│   └── fr.lang              # Traducción francés
 ├── README.md                 # Documentación en inglés
 ├── README-es.md              # Este archivo
 ├── TECHNICAL.md              # Documentación técnica (inglés)
 ├── TECHNICAL-es.md           # Documentación técnica (español)
 ├── LICENSE                   # Licencia GPL
 └── screenshots/              # Capturas de pantalla (opcional)
+```
+
+### Rutas de Instalación
+```
+/usr/local/bin/
+├── pymenu-globicons.py       # Ejecutable del menú principal
+├── pymenu-config.py          # Ejecutable del configurador
+└── pymenupuplang.py          # Módulo de traducción
+
+/usr/share/locale/pymenupup/
+├── es.lang                   # Traducción español
+└── fr.lang                   # Traducción francés
+
+~/.config/pymenupup/
+├── pymenu.json              # Configuración principal
+└── locale/                  # Traducciones personalizadas del usuario (opcional)
+    └── es-custom.lang
+
 ```
 
 ### Archivos de Configuración del Usuario
