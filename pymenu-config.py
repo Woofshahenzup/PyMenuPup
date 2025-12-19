@@ -665,7 +665,7 @@ class ConfigWindow(Gtk.Window):
         
     def on_combo_changed(self, combo, category, key):
         selected_text = combo.get_active_text()
-        for k, v in TR.items():
+        for k, v in TR.translations.items():
             if v == selected_text:
                 self.config[category][key] = k
                 break
