@@ -217,6 +217,17 @@ sudo pacman -S python python-gobject gtk3 xdg-utils
 sudo dnf install python3 python3-gobject gtk3 xdg-utils
 ```
 
+#### En Fossapup64 9.5
+
+Gracias al usuario **Burunduk** por probar en Fossapup64. Para ejecutar PyMenu en una instalación fresca de Fossapup-9.5:
+
+1. Abre el PPM (Gestor de Paquetes de Puppy)
+2. Actualiza la base de datos (~16 MB de descarga)
+3. Busca e instala `meld_3.20.2` y sus dependencias (~3 MB, usa modo auto-instalación)
+4. Ejecuta PyMenu - ahora debería funcionar
+
+**Nota:** Meld es una pequeña herramienta GUI diff que proporciona las dependencias GTK necesarias y puede ser útil por sí misma.
+
 ---
 
 ## Instalación
@@ -422,6 +433,24 @@ Si usas Tint2, edita `~/.config/tint2/tint2rc`:
 # Lanzador
 launcher_item_app = /usr/local/bin/pymenu-globicons.py
 ```
+
+---
+
+## Herramientas Externas (Opcional)
+
+PyMenu puede integrarse con herramientas externas para funcionalidad extendida. Estas herramientas **no están incluidas** en este proyecto y son completamente opcionales:
+
+### Gestor de Perfil
+- Una herramienta personalizada para configurar tu foto de perfil
+- Configura la ruta en: **Ajustes > Rutas > Gestor de perfil**
+- PyMenu funcionará sin esta herramienta
+
+### Diálogo de Apagado
+- Una interfaz personalizada de apagado/cierre de sesión
+- Configura la ruta en: **Ajustes > Rutas > Comando de apagado**
+- PyMenu funcionará sin esta herramienta
+
+**Nota:** Los usuarios pueden especificar sus propias herramientas o scripts personalizados para estas funciones. Las rutas en la configuración son ejemplos y deben ajustarse a tu sistema.
 
 ---
 

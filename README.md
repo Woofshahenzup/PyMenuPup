@@ -328,6 +328,17 @@ If your Puppy/EasyOS supports `apt`:
 apt install patchelf python3-zstandard python3-dev
 ```
 
+#### For Fossapup64 9.5
+
+Thanks to user **Burunduk** for testing on Fossapup64. To run PyMenu on a fresh Fossapup-9.5 installation:
+
+1. Open PPM (Puppy Package Manager)
+2. Update the database (~16 MB download)
+3. Search for and install `meld_3.20.2` and its dependencies (~3 MB, use auto-install mode)
+4. Run PyMenu - it should now work
+
+**Note:** Meld is a small GUI diff tool that provides the necessary GTK dependencies and can be useful on its own.
+
 ---
 
 ### ⚙️ 2. Compile Scripts Using Nuitka
@@ -427,6 +438,23 @@ If you use Tint2, edit `~/.config/tint2/tint2rc`:
 # Launcher
 launcher_item_app = /usr/local/bin/pymenu-globicons.py
 ```
+---
+
+## External Tools (Optional)
+
+PyMenu can integrate with external tools for extended functionality. These tools are **not included** in this project and are completely optional:
+
+### Profile Manager
+- A custom tool to configure your profile picture
+- Configure the path in: **Settings > Paths > Profile manager**
+- PyMenu will work without this tool
+
+### Shutdown Dialog
+- A custom shutdown/logout interface
+- Configure the path in: **Settings > Paths > Shutdown command**
+- PyMenu will work without this tool
+
+**Note:** Users can specify their own custom tools or scripts for these features. The paths in the configuration are examples and should be adjusted to your system.
 
 ---
 
