@@ -41,9 +41,9 @@ CATEGORY_MAP = TR.get_category_map()
 gi.require_version('Pango', '1.0')
 from gi.repository import Pango
 
-PROFILE_PIC = os.path.expanduser("~/.face")
-PROFILE_MANAGER = "/usr/local/bin/ProfileManager.py"
-SHUTDOWN_CMD = "/usr/local/bin/apagado-avatar.py"
+PROFILE_PIC = "" 
+PROFILE_MANAGER = ""
+SHUTDOWN_CMD = ""
 CONFIG_FILE = os.path.expanduser("~/.config/pymenu.json")
 
 import os
@@ -88,7 +88,7 @@ class ConfigManager:
         return {
             "window": {
                 "width": 477,
-                "height": 427,
+                "height": 527,
                 "decorated_window": False,
                 "hide_header": False,
                 "hide_profile_pic": False,
@@ -110,9 +110,9 @@ class ConfigManager:
             "font": {
                 "family": "Sans",
                 "family_categories": "Sans",
-                "size_categories": 12000,
-                "size_names": 10000,
-                "size_header": 8000
+                "size_categories": 16000,
+                "size_names": 14000,
+                "size_header": 12000
             },
             "colors": {
                 "use_gtk_theme": True,
@@ -133,9 +133,9 @@ class ConfigManager:
             "paths": {
                 "profile_pic": "",
                 "profile_manager": "",
-                "shutdown_cmd": "/usr/local/jwmdesk/logout_gui_jwm",
-                "jwmrc_tray": "/root/.jwmrc-tray",
-                "tint2rc": "/root/.config/tint2/tint2rc" 
+                "shutdown_cmd": "",
+                "jwmrc_tray": "/root/.jwmrc-tray",          
+                "tint2rc": "/root/.config/tint2/tint2rc"    
             },
             "search_engine": {
                 "engine": "duckduckgo"
@@ -1155,20 +1155,19 @@ class ArcMenuLauncher(Gtk.Window):
         load_profile_image()
     
         def on_profile_clicked(button):
-            try:
-                GLib.timeout_add(100, lambda: Gtk.main_quit())
-                profile_manager_path = self.config['paths']['profile_manager']
-                if os.path.exists(profile_manager_path):
-                    subprocess.Popen([profile_manager_path],
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
-                else:
-                    subprocess.Popen(["python3", profile_manager_path], 
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
-                print(f"Launching Profile Manager: {profile_manager_path}")
-            except Exception as e:
-                print(f"Error opening Profile Manager: {e}")
+            profile_manager_path = self.config['paths'].get('profile_manager', "")
+            if profile_manager_path: # Solo intenta ejecutar si NO está vacío
+                try:
+                    GLib.timeout_add(100, lambda: Gtk.main_quit())
+                    # Verificamos si es un script ejecutable o requiere python3
+                    if os.access(profile_manager_path, os.X_OK):
+                        subprocess.Popen([profile_manager_path])
+                    else:
+                        subprocess.Popen(["python3", profile_manager_path])
+                except Exception as e:
+                    print(f"Error: {e}")
+            else:
+                print("Profile Manager no configurado por el usuario.")
         
         profile_button.set_tooltip_text(TR["Select avatar"])
         profile_button.connect("clicked", on_profile_clicked)
@@ -2174,21 +2173,27 @@ class ArcMenuLauncher(Gtk.Window):
             print(f"Error al lanzar el configurador: {e}")
 
     def on_shutdown_clicked(self, button):
-        """Run shutdown command"""
-        try:
-            GLib.timeout_add(100, lambda: Gtk.main_quit())
-            shutdown_cmd_path = self.config['paths']['shutdown_cmd']
-            if os.path.exists(shutdown_cmd_path):
-                subprocess.Popen([shutdown_cmd_path],
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
-            else:
-                subprocess.Popen(["python3", shutdown_cmd_path],
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
-            print(f"Launching shutdown command: {shutdown_cmd_path}")
-        except Exception as e:
-            print(f"Failed to run shutdown command: {e}")
+            """Run shutdown command or path"""
+            try:
+                # Obtenemos el texto del JSON
+                cmd = self.config['paths'].get('shutdown_cmd', "").strip()
+                
+                if not cmd:
+                    print("No hay comando de apagado configurado.")
+                    Gtk.main_quit()
+                    return
+    
+                # Cerramos el menú
+                GLib.timeout_add(100, lambda: Gtk.main_quit())
+                subprocess.Popen(cmd, 
+                                 shell=True,
+                                 stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL)
+                                 
+                print(f"Ejecutando: {cmd}")
+                
+            except Exception as e:
+                print(f"Error al ejecutar el comando de apagado: {e}")
             
     def create_desktop_shortcut(self, app_info):
         """Crear un acceso directo .desktop usando spacefm"""

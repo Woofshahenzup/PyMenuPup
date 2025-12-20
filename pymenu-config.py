@@ -44,7 +44,7 @@ class ConfigManager:
         return {
             "window": {
                 "width": 477,
-                "height": 427,
+                "height": 527,
                 "decorated_window": False,
                 "hide_header": False,
                 "hide_profile_pic": False,
@@ -66,9 +66,9 @@ class ConfigManager:
             "font": {
                 "family": "Sans",
                 "family_categories": "Sans",
-                "size_categories": 12000,
-                "size_names": 10000,
-                "size_header": 8000
+                "size_categories": 16000,
+                "size_names": 14000,
+                "size_header": 12000
             },
             "colors": {
                 "use_gtk_theme": True,
@@ -89,9 +89,9 @@ class ConfigManager:
             "paths": {
                 "profile_pic": "",
                 "profile_manager": "",
-                "shutdown_cmd": "/usr/local/jwmdesk/logout_gui_jwm",
-                "jwmrc_tray": "/root/.jwmrc-tray",
-                "tint2rc": "/root/.config/tint2/tint2rc"  
+                "shutdown_cmd": "",
+                "jwmrc_tray": "/root/.jwmrc-tray",          
+                "tint2rc": "/root/.config/tint2/tint2rc"    
             },
             "search_engine": {
                 "engine": "duckduckgo"
