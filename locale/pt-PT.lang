@@ -68,8 +68,9 @@ Hide kernel: = Ocultar kernel:
 Hide hostname: = Ocultar hostname:
 
 # === Design do Cabeçalho ===
-Header layout: = Layout do cabeçalho:
-Header text alignment: = Alinhamento do texto do cabeçalho:
+Header layout: = Visualização do cabeçalho:
+#Header text alignment: = Alinhamento do texto do cabeçalho:
+Header text alignment: = Alinhamento do texto:
 Avatar left = Avatar à esquerda
 Avatar right = Avatar à direita
 Avatar center = Avatar ao centro
@@ -77,11 +78,11 @@ Avatar center = Avatar ao centro
 # === Formas e Posições ===
 square = Quadrado
 circular = Circular
-top = Topo
-bottom = fundo
-center = centro
-left = esquerda
-right = direita
+top = Em cima
+bottom = Em baixo
+center = Ao centro
+left = À esquerda
+right = À direita
 
 # === Alinhamento ===
 Horizontal alignment: = Alinhamento horizontal:
@@ -111,13 +112,14 @@ Header size: = Tamanho do cabeçalho:
 Profile pic path: = Caminho da foto de perfil:
 Profile manager: = Gerenciador de perfil:
 Shutdown command: = Comando de encerramento:
-JWM Tray config: = Configuração da bandeja JWM:
+JWM Tray config: = Configuração da barra do JWM:
 Tint2 config: = Configuração Tint2:
 Use Tint2 (instead of JWM): = Usar Tint2 (em vez de JWM):
 
 # === Categorias ===
 Excluded categories: = Categorias excluídas:
-Select categories to hide from menu = Selecione as categorias para ocultar do menu
+#Select categories to hide from menu = Selecione as categorias para ocultar do menu
+Select categories to hide from menu = Selecione as categorias que deseja ocultar no menu
 
 # === Nomes de Categorias ===
 Desktop = Área de Trabalho

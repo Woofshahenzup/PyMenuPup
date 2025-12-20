@@ -87,11 +87,11 @@ class ConfigManager:
                 "categories_background": "rgba(0,0,0,0.4)"
             },
             "paths": {
-                "profile_pic": "/root/.face",
-                "profile_manager": "/usr/local/bin/ProfileManager.py",
-                "shutdown_cmd": "/usr/local/bin/apagado-avatar.py",
-                "jwmrc_tray": "/root/.jwmrc-tray",          
-                "tint2rc": "/root/.config/tint2/tint2rc"    
+                "profile_pic": "",
+                "profile_manager": "",
+                "shutdown_cmd": "/usr/local/jwmdesk/logout_gui_jwm",
+                "jwmrc_tray": "/root/.jwmrc-tray",
+                "tint2rc": "/root/.config/tint2/tint2rc"  
             },
             "search_engine": {
                 "engine": "duckduckgo"
@@ -488,21 +488,30 @@ class ConfigWindow(Gtk.Window):
         entry_profile_pic = Gtk.Entry()
         entry_profile_pic.set_text(self.config['paths']["profile_pic"])
         entry_profile_pic.connect("changed", self.on_path_changed, "paths", "profile_pic")
-        grid.attach(entry_profile_pic, 1, 0, 2, 1)
+        grid.attach(entry_profile_pic, 1, 0, 1, 1)
+        browse_profile_pic = Gtk.Button(label="...")
+        browse_profile_pic.connect("clicked", self.on_browse_file, entry_profile_pic, TR['Select profile picture'])
+        grid.attach(browse_profile_pic, 2, 0, 1, 1)
         
         # Crear la entrada para el gestor de perfil
         grid.attach(Gtk.Label(label=paths_to_config["profile_manager"]), 0, 1, 1, 1)
         entry_profile_manager = Gtk.Entry()
         entry_profile_manager.set_text(self.config['paths']["profile_manager"])
         entry_profile_manager.connect("changed", self.on_path_changed, "paths", "profile_manager")
-        grid.attach(entry_profile_manager, 1, 1, 16, 1)
+        grid.attach(entry_profile_manager, 1, 1, 1, 1)
+        browse_profile_manager = Gtk.Button(label="...")
+        browse_profile_manager.connect("clicked", self.on_browse_file, entry_profile_manager, TR['Select profile manager'])
+        grid.attach(browse_profile_manager, 2, 1, 1, 1)        
         
         # Crear la entrada para el comando de apagado
         grid.attach(Gtk.Label(label=paths_to_config["shutdown_cmd"]), 0, 2, 1, 1)
         entry_shutdown_cmd = Gtk.Entry()
         entry_shutdown_cmd.set_text(self.config['paths']["shutdown_cmd"])
         entry_shutdown_cmd.connect("changed", self.on_path_changed, "paths", "shutdown_cmd")
-        grid.attach(entry_shutdown_cmd, 1, 2, 16, 1)
+        grid.attach(entry_shutdown_cmd, 1, 2, 1, 1)
+        browse_shutdown_cmd = Gtk.Button(label="...")
+        browse_shutdown_cmd.connect("clicked", self.on_browse_file, entry_shutdown_cmd, TR['Select shutdown command'])
+        grid.attach(browse_shutdown_cmd, 2, 2, 1, 1)
         
         # Separador
         separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -521,7 +530,11 @@ class ConfigWindow(Gtk.Window):
         self.entry_jwmrc_tray = Gtk.Entry()
         self.entry_jwmrc_tray.set_text(self.config['paths'].get("jwmrc_tray", "/root/.jwmrc-tray"))
         self.entry_jwmrc_tray.connect("changed", self.on_path_changed, "paths", "jwmrc_tray")
-        grid.attach(self.entry_jwmrc_tray, 1, 5, 16, 1)
+        grid.attach(self.entry_jwmrc_tray, 1, 5, 1, 1)
+
+        browse_jwm = Gtk.Button(label="...")
+        browse_jwm.connect("clicked", self.on_browse_file, self.entry_jwmrc_tray, TR['Select JWM config'])
+        grid.attach(browse_jwm, 2, 5, 1, 1)
         
         # Entrada para Tint2 config
         self.tint2_label = Gtk.Label(label=paths_to_config["tint2rc"])
@@ -529,7 +542,10 @@ class ConfigWindow(Gtk.Window):
         self.entry_tint2rc = Gtk.Entry()
         self.entry_tint2rc.set_text(self.config['paths'].get("tint2rc", "/root/.config/tint2/tint2rc"))
         self.entry_tint2rc.connect("changed", self.on_path_changed, "paths", "tint2rc")
-        grid.attach(self.entry_tint2rc, 1, 6, 16, 1)
+        grid.attach(self.entry_tint2rc, 1, 6, 1, 1)
+        browse_tint2 = Gtk.Button(label="...")
+        browse_tint2.connect("clicked", self.on_browse_file, self.entry_tint2rc, TR['Select Tint2 config'])
+        grid.attach(browse_tint2, 2, 6, 1, 1)
         
         separator2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         
@@ -557,6 +573,25 @@ class ConfigWindow(Gtk.Window):
         scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add(grid)
         return scrolled_window # Devolver el ScrolledWindow
+        
+    def on_browse_file(self, button, entry, dialog_title):
+        """Abrir diálogo para seleccionar un archivo"""
+        dialog = Gtk.FileChooserDialog(
+            title=dialog_title,
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_buttons(
+            TR['Cancel'], Gtk.ResponseType.CANCEL,
+            TR['Select'], Gtk.ResponseType.OK
+        )
+        
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            selected_file = dialog.get_filename()
+            entry.set_text(selected_file)
+        
+        dialog.destroy()      
         
     def on_tint2_toggled(self, checkbox):
         """Manejar el toggle del checkbox de Tint2"""

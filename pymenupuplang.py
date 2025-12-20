@@ -111,7 +111,15 @@ class TranslationManager:
         'Help': 'Help',
         'Rectify': 'Rectify',
         'Shutdown': 'Shutdown',
-        'Leave': 'Leave'
+        'Leave': 'Leave',
+        'Cancel': 'Cancel',
+        'Select': 'Select',
+        'Select profile picture': 'Select profile picture',
+        'Select profile manager': 'Select profile manager',
+        'Select shutdown command': 'Select shutdown command',
+        'Select JWM config': 'Select JWM config',
+        'Select Tint2 config': 'Select Tint2 config',
+        'Search engine:': 'Search engine:'
     }
     
     def __init__(self):

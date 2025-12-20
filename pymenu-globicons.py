@@ -131,11 +131,11 @@ class ConfigManager:
                 "categories_background": "rgba(0,0,0,0.4)"
             },
             "paths": {
-                "profile_pic": "/root/.face",
-                "profile_manager": "/usr/local/bin/ProfileManager.py",
-                "shutdown_cmd": "/usr/local/bin/apagado-avatar.py",
-                "jwmrc_tray": "/root/.jwmrc-tray",          
-                "tint2rc": "/root/.config/tint2/tint2rc"    
+                "profile_pic": "",
+                "profile_manager": "",
+                "shutdown_cmd": "/usr/local/jwmdesk/logout_gui_jwm",
+                "jwmrc_tray": "/root/.jwmrc-tray",
+                "tint2rc": "/root/.config/tint2/tint2rc" 
             },
             "search_engine": {
                 "engine": "duckduckgo"
