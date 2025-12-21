@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, Gdk
 import json
 import os
 import sys
@@ -147,12 +147,9 @@ class ConfigWindow(Gtk.Window):
         main_vbox.set_border_width(10)
         self.add(main_vbox)
         
-        # [CORRECCIÓN] Se elimina el scrolled window que no se usaba aquí.
-        
         notebook = Gtk.Notebook()
         main_vbox.pack_start(notebook, True, True, 0)
-        
-        # [CORRECCIÓN] Las funciones de creación de pestaña ahora devuelven un Gtk.ScrolledWindow
+     
         notebook.append_page(self.create_window_tab(), Gtk.Label(label=TR['Window']))
         notebook.append_page(self.create_colors_tab(), Gtk.Label(label=TR['Colors']))
         notebook.append_page(self.create_font_tab(), Gtk.Label(label=TR['Font']))
@@ -276,13 +273,13 @@ class ConfigWindow(Gtk.Window):
         grid.attach(Gtk.Label(label=TR['Hide categories text:']), 0, 10, 1, 1)
         hide_cat_text_check = Gtk.CheckButton()
         hide_cat_text_check.set_active(self.config['window'].get('hide_category_text', False))
-        hide_cat_text_check.connect("toggled", self.on_checkbox_toggled, 'window', 'hide_category_text')
+        hide_cat_text_check.connect("toggled", self.on_check_toggled, 'window', 'hide_category_text')
         grid.attach(hide_cat_text_check, 1, 10, 1, 1)
         
         grid.attach(Gtk.Label(label=TR['Hide app names:']), 0, 11, 1, 1)
         hide_app_names_check = Gtk.CheckButton()
         hide_app_names_check.set_active(self.config['window'].get('hide_app_names', False))
-        hide_app_names_check.connect("toggled", self.on_checkbox_toggled, 'window', 'hide_app_names')
+        hide_app_names_check.connect("toggled", self.on_check_toggled, 'window', 'hide_app_names')
         grid.attach(hide_app_names_check, 1, 11, 1, 1)
         
         grid.attach(Gtk.Label(label=TR['Hide quick access:']), 0, 12, 1, 1)
@@ -547,9 +544,7 @@ class ConfigWindow(Gtk.Window):
         browse_tint2.connect("clicked", self.on_browse_file, self.entry_tint2rc, TR['Select Tint2 config'])
         grid.attach(browse_tint2, 2, 6, 1, 1)
         
-        separator2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        
-        grid.attach(separator2, 0, 7, 17, 1)
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 7, 17, 1)
         
         # Selector de motor de búsqueda
         grid.attach(Gtk.Label(label=TR['Search engine:']), 0, 8, 1, 1)
@@ -694,7 +689,8 @@ class ConfigWindow(Gtk.Window):
         self.config_manager.save_config(self.config)       
             
     def on_spin_button_changed(self, spin_button, category, key):
-        self.config[category][key] = int(spin_button.get_value())
+        value = int(spin_button.get_value())  # ← Definir la variable
+        self.config[category][key] = value
         self.config_manager.save_config(self.config)
         print(f"DEBUG: Guardado {category}.{key} = {value}")
         
@@ -731,10 +727,6 @@ class ConfigWindow(Gtk.Window):
         parts = font_desc.rsplit(' ', 1)
         font_family = parts[0] if len(parts) > 0 else font_desc
         self.config[category][key] = font_family
-        self.config_manager.save_config(self.config)
-        
-    def on_checkbox_toggled(self, button, category, key):
-        self.config[category][key] = button.get_active()    
         self.config_manager.save_config(self.config)
         
     def on_save_only_clicked(self, button):

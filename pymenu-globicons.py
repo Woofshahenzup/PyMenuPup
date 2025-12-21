@@ -41,14 +41,8 @@ CATEGORY_MAP = TR.get_category_map()
 gi.require_version('Pango', '1.0')
 from gi.repository import Pango
 
-PROFILE_PIC = "" 
-PROFILE_MANAGER = ""
-SHUTDOWN_CMD = ""
 CONFIG_FILE = os.path.expanduser("~/.config/pymenu.json")
 
-import os
-import subprocess
-# ...
 
 def open_directory(path):
     """
@@ -926,8 +920,6 @@ class ArcMenuLauncher(Gtk.Window):
             return True
             
         return False
-            
-        return False
  
     def on_key_press(self, widget, event):
         """Close window with Escape key"""
@@ -1120,7 +1112,7 @@ class ArcMenuLauncher(Gtk.Window):
             pixbuf = None
 
             # 1. Intentar cargar el .face del usuario
-            if os.path.exists(profile_pic_path):
+            if profile_pic_path and os.path.exists(profile_pic_path):
                 try:
                     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                         profile_pic_path, profile_pic_size, profile_pic_size, True
@@ -1262,15 +1254,17 @@ class ArcMenuLauncher(Gtk.Window):
             header_box.pack_start(system_info_box, True, True, 0)
         
     # Monitor de cambios en el archivo de perfil (solo si no está oculto)
-        if not hide_profile:
-            profile_file = Gio.File.new_for_path(self.config['paths']['profile_pic'])
-            monitor = profile_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
-            
-            def on_file_changed(monitor, file, other_file, event_type):
-                if event_type in (Gio.FileMonitorEvent.CHANGED, Gio.FileMonitorEvent.CREATED):
-                    GLib.idle_add(load_profile_image)
-            
-            monitor.connect("changed", on_file_changed)
+            if not hide_profile:
+                profile_pic_path = self.config['paths']['profile_pic']
+                if profile_pic_path and os.path.exists(profile_pic_path):
+                    profile_file = Gio.File.new_for_path(profile_pic_path)
+                    monitor = profile_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
+                    
+                    def on_file_changed(monitor, file, other_file, event_type):
+                        if event_type in (Gio.FileMonitorEvent.CHANGED, Gio.FileMonitorEvent.CREATED):
+                            GLib.idle_add(load_profile_image)
+                    
+                    monitor.connect("changed", on_file_changed)
         
         return header_box
             
@@ -1384,19 +1378,6 @@ class ArcMenuLauncher(Gtk.Window):
         container.pack_start(scrolled, True, True, 0)
         container.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL), False, False, 0)
     
-        return container
-
-    def create_social_networks_container(self):
-        container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        container.set_margin_top(5)
-        container.set_margin_bottom(5)
-        container.set_margin_start(10)
-        container.set_margin_end(10)
-        
-        social_box = self.create_social_networks_buttons()
-        # Cambiar pack_start por pack_end para alinear a la derecha
-        container.pack_end(social_box, False, False, 0)
-        
         return container
     
     def open_url(self, url):
@@ -1851,35 +1832,6 @@ class ArcMenuLauncher(Gtk.Window):
                         return full_path
     
         return None
-
-
-    
-    def find_icon_path(self, icon_name):
-        """Find icon in the defined icon paths"""
-        if os.path.isabs(icon_name):
-            return icon_name if os.path.exists(icon_name) else None
-        
-        extensions = ['.png', '.svg', '.xpm', '.ico', '.jpg', '.jpeg', '.gif', '']
-        
-        for path in self.parser.icon_paths:
-            if not os.path.exists(path):
-                continue
-            
-            for ext in extensions:
-                full_path = os.path.join(path, icon_name + ext)
-                if os.path.exists(full_path) and self.is_valid_image_file(full_path):
-                    return full_path
-            
-            try:
-                for filename in os.listdir(path):
-                    if filename.startswith(icon_name):
-                        full_path = os.path.join(path, filename)
-                        if os.path.isfile(full_path) and self.is_valid_image_file(full_path):
-                            return full_path
-            except (OSError, PermissionError):
-                continue
-        
-        return None
     
     def is_valid_image_file(self, file_path):
         """Check if file is a valid image that GdkPixbuf can load"""
@@ -1901,9 +1853,6 @@ class ArcMenuLauncher(Gtk.Window):
             pass
     
         return False
-
-        
-        return None
     
     def show_all_applications(self):
         """Show all applications with lazy loading"""
@@ -2118,43 +2067,6 @@ class ArcMenuLauncher(Gtk.Window):
 
         except Exception as e:
             print(f"Error launching {app_info.get('Name', 'Unknown')}: {e}")
-
-    def on_profile_clicked(self, button):
-        """Open ProfileManager when profile thumbnail is clicked"""
-        try:
-            GLib.timeout_add(100, lambda: Gtk.main_quit())
-            profile_manager_path = self.config['paths']['profile_manager']
-            
-            # Intentar primero con el binario (sin extensión)
-            profile_manager_binary = profile_manager_path.replace('.py', '')
-            
-            if os.path.exists(profile_manager_binary) and os.access(profile_manager_binary, os.X_OK):
-                # Si existe el binario y es ejecutable, usarlo
-                subprocess.Popen([profile_manager_binary], 
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
-                print(f"Launching Profile Manager (binary): {profile_manager_binary}")
-            elif os.path.exists(profile_manager_path):
-                # Si no, intentar con el archivo .py
-                subprocess.Popen(["python3", profile_manager_path], 
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL)
-                print(f"Launching Profile Manager (python): {profile_manager_path}")
-            else:
-                # Si ninguno existe, intentar ejecutar directamente por si está en PATH
-                try:
-                    subprocess.Popen([profile_manager_binary], 
-                                   stdout=subprocess.DEVNULL,
-                                   stderr=subprocess.DEVNULL)
-                    print(f"Launching Profile Manager from PATH: {profile_manager_binary}")
-                except FileNotFoundError:
-                    subprocess.Popen(["python3", profile_manager_path], 
-                                   stdout=subprocess.DEVNULL,
-                                   stderr=subprocess.DEVNULL)
-                    print(f"Launching Profile Manager (fallback): {profile_manager_path}")
-                    
-        except Exception as e:
-            print(f"Error opening Profile Manager: {e}")
             
     # Función que faltaba
     def on_config_clicked(self, button):
