@@ -1,6 +1,6 @@
 # ============================================
 # PyMenuPup - Translation Template
-# Version: 1.1
+# Version: 1.2
 # Instructions: Copy this file as 'your_language_code.lang' 
 # (e.g., fr.lang, de.lang) and translate the text after the '='.
 # ============================================
@@ -46,6 +46,7 @@ Select avatar =
 Terminal = 
 Terminal emulator = 
 File Manager = 
+File manager = 
 Web browser = 
 Run = 
 Create desktop shortcut = 
@@ -63,11 +64,56 @@ Open directory: =
 
 # === Social Networks ===
 Social Networks = 
-Hide social networks = 
+Hide social networks: = 
 
-# === GUI Configuration Settings ===
-General = 
+# === Window Options ===
+Window width: = 
+Window height: = 
+Icon size: = 
+Category icon size: = 
+Profile pic size: = 
+Profile pic shape: = 
+square = 
+circular = 
+Show window frame: = 
+(No transparency) = 
+
+# === Visibility Options ===
+Hide header: = 
+Hide profile picture: = 
+Hide quick access: = 
+Hide social networks: = 
+Hide categories text: = 
+Hide app names: = 
+Hide OS name: = 
+Hide kernel: = 
+Hide hostname: = 
+Hide places sidebar: = 
+(Hides both places and favorites) = 
+Hide favorites only: = 
+(Show places but hide favorites) = 
+Show profile in places sidebar: = 
+(Instead of header) = 
+
+# === Header Layout ===
+Header layout: = 
+Header text alignment: = 
+Avatar left = 
+Avatar right = 
+Avatar center = 
+
+# === Shapes and Positions ===
+top = 
+bottom = 
+center = 
+left = 
+right = 
+
+# === Alignment ===
+Horizontal alignment: = 
 Search bar position: = 
+
+# === Colors ===
 Use system theme: = 
 Background color: = 
 Border color: = 
@@ -79,11 +125,15 @@ Header (Hostname): =
 Hover background: = 
 Button background: = 
 Button text: = 
+
+# === Fonts ===
 Font family: = 
 Category font: = 
 Category size: = 
 App name size: = 
 Header size: = 
+
+# === Paths ===
 Profile pic path: = 
 Profile manager: = 
 Shutdown command: = 
@@ -111,4 +161,50 @@ Internet =
 Multimedia = 
 Fun = 
 Help = 
-Rectify =
+Rectify = 
+Shutdown = 
+Leave = 
+
+# === Favorites Section ===
+Favorites = 
+Add favorite = 
+No favorites yet. Click here to add one. = 
+Add Favorite = 
+Add = 
+Select an application: = 
+Search applications... = 
+Application = 
+Select a directory: = 
+Path to directory = 
+Browse... = 
+Directory = 
+Name: = 
+Favorite name = 
+Command: = 
+Command to execute = 
+Icon (optional): = 
+Icon name or path = 
+Browse icon = 
+Open File Manager = 
+Command = 
+Select Directory = 
+Select Icon = 
+Image files = 
+All files = 
+
+# === Configuration Dialogs ===
+Select profile picture = 
+Select profile manager = 
+Select shutdown command = 
+Select JWM config = 
+Select Tint2 config = 
+Select = 
+Cancel = 
+
+# === GUI Configuration Settings ===
+General = 
+
+# === Note ===
+# Lines ending with ':' are labels (Window width:, Hide header:, etc.)
+# Lines without ':' are options/buttons (Save, Exit, Avatar left, etc.)
+# Lines in parentheses are tooltips/descriptions ((No transparency), etc.)

@@ -46,29 +46,31 @@ CONFIG_FILE = "/root/.config/pymenu.json"
 
 def open_directory(path):
     """
-    Intenta expandir la ruta de acceso rápido (~) y abrirla. 
-    Si no existe, la crea antes de intentar abrir.
+    Intenta expandir la ruta y abrirla con el administrador predeterminado del sistema.
     """
-    # 1. Expande el caracter '~' a la ruta completa del usuario.
     expanded_path = os.path.expanduser(path)
     
-    # 2. Verifica si la carpeta existe.
     if not os.path.exists(expanded_path):
         try:
-            # Si no existe, la crea con el nombre traducido (ej. 'Descargas')
             os.makedirs(expanded_path, exist_ok=True)
             print(f"{TR['Folder created:']} {expanded_path}")
         except Exception as e:
             print(f"Error al crear la carpeta {expanded_path}: {e}")
             return 
     
-    # 3. Abre la carpeta.
     try:
-        subprocess.Popen(["xdg-open", expanded_path],
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
+        # Esto le pide al sistema que abra la ruta con la APP PREDETERMINADA
+        # (Sea Thunar, PCManFM, Nautilus, etc.)
+        gio_file = Gio.File.new_for_path(expanded_path)
+        Gio.AppInfo.launch_default_for_uri(gio_file.get_uri(), None)
     except Exception as e:
-        print(f"Error al intentar abrir el directorio {expanded_path}: {e}")
+        # Si falla Gio, intentamos con xdg-open como respaldo
+        try:
+            subprocess.Popen(["xdg-open", expanded_path],
+                             stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+        except Exception as ex:
+            print(f"Error al abrir el directorio: {ex}")
                 
 
 class ConfigManager:
@@ -2421,72 +2423,43 @@ class ArcMenuLauncher(Gtk.Window):
             print(f"Failed to launch browser: {e}")
     
     def on_app_clicked(self, button, app_info):
-        """Handle application launch - versión mejorada"""
-        try:
-            GLib.timeout_add(50, lambda: Gtk.main_quit())
-            
-            command = app_info.get('Exec', '')
-            name = app_info.get('Name', 'Unknown')
-            
-            if not command:
-                print(f"❌ ERROR: Comando vacío para {name}")
-                return
-            
-            print(f"🔍 DEBUG: Lanzando {name}")
-            print(f"🔍 DEBUG: Comando original: {command}")
-            
-            # Si el comando usa gtk-launch, procesarlo especialmente
-            if command.startswith('gtk-launch '):
-                desktop_file = command.replace('gtk-launch ', '').strip()
-                print(f"🔍 DEBUG: Detectado gtk-launch con archivo: {desktop_file}")
+            """Handle application launch - Fix para carpetas forzadas"""
+            try:
+                GLib.timeout_add(50, lambda: Gtk.main_quit())
                 
-                # Buscar el archivo .desktop en las rutas comunes
-                search_paths = [
-                    '/usr/share/applications/',
-                    '/usr/local/share/applications/',
-                    os.path.expanduser('~/.local/share/applications/')
-                ]
+                command = app_info.get('Exec', '')
+                name = app_info.get('Name', 'Unknown')
                 
-                real_command = None
-                for path in search_paths:
-                    desktop_path = os.path.join(path, desktop_file)
-                    if os.path.exists(desktop_path):
-                        print(f"✅ DEBUG: Encontrado .desktop en: {desktop_path}")
-                        # Leer el comando real del archivo .desktop
-                        try:
-                            with open(desktop_path, 'r') as f:
-                                for line in f:
-                                    if line.startswith('Exec='):
-                                        real_command = line.replace('Exec=', '').strip()
-                                        # Limpiar parámetros como %f, %u, etc.
-                                        import re
-                                        real_command = re.sub(r'\s+%\w+', '', real_command)
-                                        print(f"✅ DEBUG: Comando real extraído: {real_command}")
-                                        break
-                        except Exception as e:
-                            print(f"⚠️ DEBUG: Error leyendo .desktop: {e}")
-                        break
+                if not command:
+                    return
+    
+                # --- CORRECCIÓN DINÁMICA DE CARPETAS ---
+                # Si el comando contiene una ruta absoluta (empieza por / o tiene /root, /home, etc)
+                # Intentamos extraer esa ruta para usar el gestor por defecto
+                import re
+                path_match = re.search(r'(/[^\s\']+)', command)
+                if path_match:
+                    potential_path = os.path.expanduser(path_match.group(1))
+                    if os.path.isdir(potential_path):
+                        print(f"📁 DEBUG: Detectada ruta en comando, abriendo con sistema: {potential_path}")
+                        open_directory(potential_path)
+                        return
+                # ---------------------------------------
+    
+                # Si el comando usa gtk-launch... (mantén tu lógica actual aquí)
+                if command.startswith('gtk-launch '):
+                    # ... (tu código de búsqueda de .desktop) ...
+                    pass
+    
+                print(f"▶️ Ejecutando comando: {command}")
+                subprocess.Popen(command, 
+                                shell=True,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                                start_new_session=True)
                 
-                if real_command:
-                    command = real_command
-                else:
-                    print(f"⚠️ DEBUG: No se encontró el .desktop, intentando con gtk-launch directo")
-            
-            print(f"▶️ Ejecutando: {command}")
-            
-            # Ejecutar el comando
-            subprocess.Popen(command, 
-                            shell=True,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL,
-                            start_new_session=True)
-            
-            print(f"✅ Lanzado: {name}")
-            
-        except Exception as e:
-            print(f"❌ Error lanzando {name}: {e}")
-            import traceback
-            traceback.print_exc()            
+            except Exception as e:
+                print(f"❌ Error lanzando {name}: {e}")          
             
     def launch_application(self, app_info):
         """Función centralizada para lanzar cualquier aplicación"""
