@@ -18,21 +18,19 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 try:
     sys.path.insert(0, '/usr/local/bin')
     from pymenupuplang import TranslationManager
-except ModuleNotFoundError:
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        "pymenupuplang", 
-        "/usr/local/bin/pymenupuplang.py"
-    )
-    if spec and spec.loader:
-        pymenupuplang = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(pymenupuplang)
-        TranslationManager = pymenupuplang.TranslationManager
-    else:
-        print("ERROR: No se pudo cargar pymenupuplang.py")
-        sys.exit(1)
-
-TR = TranslationManager()
+    TR = TranslationManager(app_name="pymenupup") 
+except:
+    # Si no existe pymenupuplang.py, usar inglés
+    class FallbackTranslator:
+        def __getitem__(self, key):
+            return key
+        def get(self, key, default=None):
+            return default or key
+        def get_category_map(self):
+            return {}
+    
+    TR = FallbackTranslator()
+    print("Warning: pymenupuplang not found, using English")
 
 # Generar CATEGORY_MAP automáticamente desde archivos .lang
 CATEGORY_MAP = TR.get_category_map()
