@@ -571,14 +571,16 @@ class ConfigWindow(Gtk.Window):
         grid.attach(Gtk.Label(label=TR['Search engine:']), 0, 4, 1, 1)
         search_engine_combo = Gtk.ComboBoxText()
         
-        # Agregar los motores de búsqueda
+        # Agregar los 9 motores de búsqueda disponibles
         search_engine_combo.append("duckduckgo", "DuckDuckGo")
         search_engine_combo.append("google", "Google")
+        search_engine_combo.append("brave", "Brave Search")
+        search_engine_combo.append("searxng", "SearXNG")
+        search_engine_combo.append("librex", "LibreX")
         search_engine_combo.append("bing", "Bing")
         search_engine_combo.append("yahoo", "Yahoo")
         search_engine_combo.append("startpage", "Startpage")
         search_engine_combo.append("ecosia", "Ecosia")
-        search_engine_combo.append("brave", "Brave Search")
         
         # Establecer el motor actual (si existe)
         current_engine = self.config.get('search_engine', {}).get('engine', 'duckduckgo')
@@ -730,7 +732,7 @@ class ConfigWindow(Gtk.Window):
         scrolled_places.add(places_checkbox_grid)
         
         # Separador antes de favoritos
-        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 12, 3, 1)  # CORREGIDO
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 12, 3, 1)  
     
         # === FIXED FAVORITES SECTION ===
         fav_title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

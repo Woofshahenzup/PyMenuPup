@@ -2809,7 +2809,11 @@ class ArcMenuLauncher(Gtk.Window):
             'duckduckgo': f"https://duckduckgo.com/?q={encoded_query}",
             'brave': f"https://search.brave.com/search?q={encoded_query}",
             'searxng': f"https://searx.be/search?q={encoded_query}",
-            'librex': f"https://librex.terryiscool160.xyz/search.php?q={encoded_query}"
+            'librex': f"https://librex.terryiscool160.xyz/search.php?q={encoded_query}",
+            'bing': f"https://www.bing.com/search?q={encoded_query}",
+            'yahoo': f"https://search.yahoo.com/search?p={encoded_query}",
+            'startpage': f"https://www.startpage.com/search?q={encoded_query}",
+            'ecosia': f"https://www.ecosia.org/search?q={encoded_query}"
         }
         
         # Obtener URL del motor seleccionado, con Google como fallback
