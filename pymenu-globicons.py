@@ -148,7 +148,11 @@ class ConfigManager:
             "categories": {
                 "excluded": []
             },
-            "favorites": []
+            "favorites": [],
+            "places": {
+                 "visible_folders": ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"],
+                 "all_available": ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"]
+            },
         }
 
     def load_config(self):
@@ -1632,46 +1636,58 @@ class ArcMenuLauncher(Gtk.Window):
             places_box.pack_start(profile_section, False, False, 5)
             places_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 5)
         
-        # 2. LUGARES DEL SISTEMA (Home, Downloads, etc.)
-        system_places = [
-            ('user-home', TR.get('Home', 'Home'), '~'),
-            ('folder-download', TR.get('Downloads', 'Downloads'), f"~/{TR.get('DownloadsDir', 'Downloads')}"),
-            ('folder-music', TR.get('Music', 'Music'), f"~/{TR.get('MusicDir', 'Music')}"),
-            ('folder-documents', TR.get('Documents', 'Documents'), f"~/{TR.get('DocumentsDir', 'Documents')}"),
-            ('folder-pictures', TR.get('Pictures', 'Pictures'), f"~/{TR.get('PicturesDir', 'Pictures')}"),
-            ('folder-videos', TR.get('Videos', 'Videos'), f"~/{TR.get('VideosDir', 'Videos')}"),
-        ]
+        # 2. LUGARES DEL SISTEMA (Home, Downloads, etc.) - FILTRADOS POR CONFIGURACIÓN
+        # Diccionario de carpetas disponibles con sus íconos y rutas
+        all_system_places = {
+            'Home': ('user-home', TR.get('Home', 'Home'), '~'),
+            'Downloads': ('folder-download', TR.get('Downloads', 'Downloads'), f"~/{TR.get('DownloadsDir', 'Downloads')}"),
+            'Documents': ('folder-documents', TR.get('Documents', 'Documents'), f"~/{TR.get('DocumentsDir', 'Documents')}"),
+            'Music': ('folder-music', TR.get('Music', 'Music'), f"~/{TR.get('MusicDir', 'Music')}"),
+            'Pictures': ('folder-pictures', TR.get('Pictures', 'Pictures'), f"~/{TR.get('PicturesDir', 'Pictures')}"),
+            'Videos': ('folder-videos', TR.get('Videos', 'Videos'), f"~/{TR.get('VideosDir', 'Videos')}"),
+            'Desktop': ('user-desktop', TR.get('Desktop', 'Desktop'), '~/Desktop'),
+            'Templates': ('folder-templates', TR.get('Templates', 'Templates'), '~/Templates'),
+            'Public': ('folder-publicshare', TR.get('Public', 'Public'), '~/Public'),
+            'Recent': ('document-open-recent', TR.get('Recent', 'Recent'), '~/.local/share/recently-used.xbel')
+        }
         
-        # Fuente para los textos
+        # Obtener lista de carpetas visibles desde la configuración
+        visible_folders = self.config.get('places', {}).get('visible_folders', ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"])
+        
+        # Fuente para los textos (FALTABA ESTA LÍNEA)
         font_desc = Pango.FontDescription.from_string(self.config['font'].get('family_categories', 'Sans'))
         font_desc.set_size(self.config['font'].get('size_categories', 12000))
-    
-        for icon_name, label, path in system_places:
-            btn = Gtk.Button()
-            btn.set_relief(Gtk.ReliefStyle.NONE)
-            btn.get_style_context().add_class('social-button')
-            btn.set_size_request(40, -1)
-            
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-            hbox.set_halign(Gtk.Align.START)
-            hbox.set_margin_start(5)
-            
-            # Icono de sistema (24px)
-            icon_image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
-            icon_image.set_pixel_size(24)
-            
-            # Texto
-            text_label = Gtk.Label(label=label)
-            text_label.set_halign(Gtk.Align.START)
-            text_label.override_font(font_desc)
-            
-            hbox.pack_start(icon_image, False, False, 0)
-            hbox.pack_start(text_label, True, True, 0)
-            
-            btn.add(hbox)
-            btn.connect("clicked", lambda b, p=path: open_directory(p))
-            places_box.pack_start(btn, False, False, 0)
-    
+        
+        # Mostrar solo las carpetas visibles
+        for folder_key in visible_folders:
+            if folder_key in all_system_places:
+                icon_name, label, path = all_system_places[folder_key]
+                
+                btn = Gtk.Button()
+                btn.set_relief(Gtk.ReliefStyle.NONE)
+                btn.get_style_context().add_class('social-button')
+                btn.set_size_request(40, -1)
+                
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+                hbox.set_halign(Gtk.Align.START)
+                hbox.set_margin_start(5)
+                
+                # Icono de sistema (24px)
+                icon_image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
+                icon_image.set_pixel_size(24)
+                
+                # Texto
+                text_label = Gtk.Label(label=label)
+                text_label.set_halign(Gtk.Align.START)
+                text_label.override_font(font_desc)  # <-- AHORA font_desc ESTÁ DEFINIDA
+                
+                hbox.pack_start(icon_image, False, False, 0)
+                hbox.pack_start(text_label, True, True, 0)
+                
+                btn.add(hbox)
+                btn.connect("clicked", lambda b, p=path: open_directory(p))
+                places_box.pack_start(btn, False, False, 0)
+        
         # 3. SEPARADOR Y FAVORITOS
         places_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 5)
         

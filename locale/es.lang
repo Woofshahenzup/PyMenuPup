@@ -210,6 +210,21 @@ Select Directory = Seleccionar Directorio
 Select Icon = Seleccionar Icono
 Image files = Archivos de imagen
 All files = Todos los archivos
+# === Carpetas Visibles en Places Sidebar ===
+Visible Folders in Places Sidebar = Carpetas Visibles en la Barra Lateral de Lugares
+Select which folders to show in the Places sidebar: = Selecciona qué carpetas mostrar en la barra lateral de Lugares:
+
+# === Carpetas adicionales ===
+Desktop = Escritorio
+Templates = Plantillas
+Public = Público
+Recent = Recientes
+
+# === Mensajes adicionales favoritos ===
+Search applications... = Buscar aplicaciones...
+Select = Seleccionar
+Select = Seleccionar
+Cancel = Cancelar
 
 # === Mensajes de Configuración ===
 Select profile picture = Seleccionar foto de perfil

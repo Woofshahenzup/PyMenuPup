@@ -154,6 +154,21 @@ Select Directory =
 Select Icon = 
 Image files = 
 All files =
+# === Visible Folders in Places Sidebar ===
+Visible Folders in Places Sidebar = 
+Select which folders to show in the Places sidebar: = 
+
+# === Additional folders ===
+Desktop = 
+Templates = 
+Public = 
+Recent = 
+
+# === Additional favorites messages ===
+Search applications... = 
+Select = 
+Select = 
+Cancel = 
 
 # === Configuration Dialogs ===
 Select profile picture = 

@@ -211,7 +211,6 @@ class TranslationManager:
                     
                     # Buscar el separador =
                     if '=' not in line:
-                        print(f"⚠️  Línea {line_num} ignorada (sin '='): {line}")
                         continue
                     
                     # Separar clave y valor

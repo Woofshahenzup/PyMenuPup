@@ -104,7 +104,11 @@ class ConfigManager:
             "categories": {
                 "excluded": []
             },
-            "favorites": []
+            "favorites": [],
+            "places": {
+                 "visible_folders": ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"],
+                 "all_available": ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"]
+            },     
         }
 
     def load_config(self):
@@ -519,149 +523,245 @@ class ConfigWindow(Gtk.Window):
         return scrolled_window
 
     def create_paths_tab(self):
-            grid = Gtk.Grid(row_spacing=10, column_spacing=10)
-            grid.set_border_width(10)
-            
-            paths_to_config = {
-                "profile_pic": TR['Profile pic path:'],
-                "profile_manager": TR['Profile manager:'],
-                "shutdown_cmd": TR['Shutdown command:'],
-                "jwmrc_tray": TR['JWM Tray config:'],
-                "tint2rc": TR['Tint2 config:'],
-                "xfce_panel": TR['XFCE panel config:'] 
-            }
-            
-            # --- Configuración de Rutas Generales ---
-            grid.attach(Gtk.Label(label=paths_to_config["profile_pic"]), 0, 0, 1, 1)
-            entry_profile_pic = Gtk.Entry()
-            entry_profile_pic.set_text(self.config['paths']["profile_pic"])
-            entry_profile_pic.connect("changed", self.on_path_changed, "paths", "profile_pic")
-            grid.attach(entry_profile_pic, 1, 0, 1, 1)
-            browse_profile_pic = Gtk.Button(label="...")
-            browse_profile_pic.connect("clicked", self.on_browse_file, entry_profile_pic, TR['Select profile picture'])
-            grid.attach(browse_profile_pic, 2, 0, 1, 1)
+        grid = Gtk.Grid(row_spacing=10, column_spacing=10)
+        grid.set_border_width(10)
+        
+        paths_to_config = {
+            "profile_pic": TR['Profile pic path:'],
+            "profile_manager": TR['Profile manager:'],
+            "shutdown_cmd": TR['Shutdown command:'],
+            "jwmrc_tray": TR['JWM Tray config:'],
+            "tint2rc": TR['Tint2 config:'],
+            "xfce_panel": TR['XFCE panel config:'] 
+        }
+        
+        # --- Configuración de Rutas Generales ---
+        grid.attach(Gtk.Label(label=paths_to_config["profile_pic"]), 0, 0, 1, 1)
+        entry_profile_pic = Gtk.Entry()
+        entry_profile_pic.set_text(self.config['paths']["profile_pic"])
+        entry_profile_pic.connect("changed", self.on_path_changed, "paths", "profile_pic")
+        grid.attach(entry_profile_pic, 1, 0, 1, 1)
+        browse_profile_pic = Gtk.Button(label="...")
+        browse_profile_pic.connect("clicked", self.on_browse_file, entry_profile_pic, TR['Select profile picture'])
+        grid.attach(browse_profile_pic, 2, 0, 1, 1)
     
-            grid.attach(Gtk.Label(label=paths_to_config["profile_manager"]), 0, 1, 1, 1)
-            entry_profile_manager = Gtk.Entry()
-            entry_profile_manager.set_text(self.config['paths']["profile_manager"])
-            entry_profile_manager.connect("changed", self.on_path_changed, "paths", "profile_manager")
-            grid.attach(entry_profile_manager, 1, 1, 1, 1)
-            browse_profile_manager = Gtk.Button(label="...")
-            browse_profile_manager.connect("clicked", self.on_browse_file, entry_profile_manager, TR['Select profile manager'])
-            grid.attach(browse_profile_manager, 2, 1, 1, 1)        
+        grid.attach(Gtk.Label(label=paths_to_config["profile_manager"]), 0, 1, 1, 1)
+        entry_profile_manager = Gtk.Entry()
+        entry_profile_manager.set_text(self.config['paths']["profile_manager"])
+        entry_profile_manager.connect("changed", self.on_path_changed, "paths", "profile_manager")
+        grid.attach(entry_profile_manager, 1, 1, 1, 1)
+        browse_profile_manager = Gtk.Button(label="...")
+        browse_profile_manager.connect("clicked", self.on_browse_file, entry_profile_manager, TR['Select profile manager'])
+        grid.attach(browse_profile_manager, 2, 1, 1, 1)        
+        
+        grid.attach(Gtk.Label(label=paths_to_config["shutdown_cmd"]), 0, 2, 1, 1)
+        entry_shutdown_cmd = Gtk.Entry()
+        entry_shutdown_cmd.set_text(self.config['paths']["shutdown_cmd"])
+        entry_shutdown_cmd.connect("changed", self.on_path_changed, "paths", "shutdown_cmd")
+        grid.attach(entry_shutdown_cmd, 1, 2, 1, 1)
+        browse_shutdown_cmd = Gtk.Button(label="...")
+        browse_shutdown_cmd.connect("clicked", self.on_browse_file, entry_shutdown_cmd, TR['Select shutdown command'])
+        grid.attach(browse_shutdown_cmd, 2, 2, 1, 1)
+        
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 3, 3, 1)
+        
+        grid.attach(Gtk.Label(label=TR['Tray/Panel type:']), 0, 4, 1, 1)
+        tray_type_combo = Gtk.ComboBoxText()
+        tray_type_combo.append("jwm", TR['JWM Tray'])
+        tray_type_combo.append("tint2", TR['Tint2 Panel'])
+        tray_type_combo.append("xfce", TR['XFCE Panel'])
+        tray_type_combo.append("lxde", TR['LXDE Panel'])  # ← NUEVO
+        
+        current_tray_type = self.config.get('tray', {}).get('type', 'jwm')
+        tray_type_combo.set_active_id(current_tray_type)
+        tray_type_combo.connect("changed", self.on_tray_type_changed)
+        grid.attach(tray_type_combo, 1, 4, 1, 1)
+        
+        # Configuración de tray (unificada)
+        tray_grid = Gtk.Grid(row_spacing=10, column_spacing=10)
+        grid.attach(tray_grid, 0, 5, 3, 1)
+        
+        # JWM Tray config
+        self.jwm_label = Gtk.Label(label=TR['JWM Tray config:'])
+        tray_grid.attach(self.jwm_label, 0, 0, 1, 1)
+        self.entry_jwmrc_tray = Gtk.Entry()
+        self.entry_jwmrc_tray.set_text(self.config['paths'].get("jwmrc_tray", "/root/.jwmrc-tray"))
+        self.entry_jwmrc_tray.connect("changed", self.on_path_changed, "paths", "jwmrc_tray")
+        tray_grid.attach(self.entry_jwmrc_tray, 1, 0, 1, 1)
+        browse_jwm = Gtk.Button(label="...")
+        browse_jwm.connect("clicked", self.on_browse_file, self.entry_jwmrc_tray, TR['Select JWM config'])
+        tray_grid.attach(browse_jwm, 2, 0, 1, 1)
+        
+        # Tint2 config
+        self.tint2_label = Gtk.Label(label=TR['Tint2 config:'])
+        tray_grid.attach(self.tint2_label, 0, 1, 1, 1)
+        self.entry_tint2rc = Gtk.Entry()
+        self.entry_tint2rc.set_text(self.config['paths'].get("tint2rc", "/root/.config/tint2/tint2rc"))
+        self.entry_tint2rc.connect("changed", self.on_path_changed, "paths", "tint2rc")
+        tray_grid.attach(self.entry_tint2rc, 1, 1, 1, 1)
+        browse_tint2 = Gtk.Button(label="...")
+        browse_tint2.connect("clicked", self.on_browse_file, self.entry_tint2rc, TR['Select Tint2 config'])
+        tray_grid.attach(browse_tint2, 2, 1, 1, 1)
+        
+        # XFCE config
+        self.xfce_label = Gtk.Label(label=TR['XFCE panel config:'])
+        tray_grid.attach(self.xfce_label, 0, 2, 1, 1)
+        self.entry_xfce_panel = Gtk.Entry()
+        self.entry_xfce_panel.set_text(self.config['paths'].get("xfce_panel", "/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"))
+        self.entry_xfce_panel.connect("changed", self.on_path_changed, "paths", "xfce_panel")
+        tray_grid.attach(self.entry_xfce_panel, 1, 2, 1, 1)
+        browse_xfce = Gtk.Button(label="...")
+        browse_xfce.connect("clicked", self.on_browse_file, self.entry_xfce_panel, TR['Select XFCE panel config'])
+        tray_grid.attach(browse_xfce, 2, 2, 1, 1)
+        
+        # LXDE Panel config (NUEVO)
+        self.lxde_label = Gtk.Label(label=TR['LXDE panel config:'])
+        tray_grid.attach(self.lxde_label, 0, 3, 1, 1)
+        self.entry_lxde_panel = Gtk.Entry()
+        self.entry_lxde_panel.set_text(self.config['paths'].get("lxde_panel", "/root/.config/lxpanel/LXDE/panels/panel"))
+        self.entry_lxde_panel.connect("changed", self.on_path_changed, "paths", "lxde_panel")
+        tray_grid.attach(self.entry_lxde_panel, 1, 3, 1, 1)
+        browse_lxde = Gtk.Button(label="...")
+        browse_lxde.connect("clicked", self.on_browse_file, self.entry_lxde_panel, TR['Select LXDE panel config'])
+        tray_grid.attach(browse_lxde, 2, 3, 1, 1)            
+        
+        # Separador antes de la sección de carpetas visibles
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 6, 3, 1)
+        
+        # === NUEVA SECCIÓN: CARPETAS VISIBLES EN PLACES ===
+        # Asegurar que existe la configuración de carpetas
+        if 'places' not in self.config:
+            self.config['places'] = {}
+        if 'visible_folders' not in self.config['places']:
+            # Configuración predeterminada
+            self.config['places']['visible_folders'] = ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos"]
+        if 'all_available' not in self.config['places']:
+            self.config['places']['all_available'] = ["Home", "Downloads", "Documents", "Music", "Pictures", "Videos", "Desktop", "Templates", "Public", "Recent"]
+        
+        # Título de la sección
+        places_title_label = Gtk.Label()
+        places_title_label.set_markup(f"<b>{TR['Visible Folders in Places Sidebar']}</b>")
+        places_title_label.set_halign(Gtk.Align.START)
+        grid.attach(places_title_label, 0, 7, 3, 1)
+        
+        # Descripción
+        desc_label = Gtk.Label(label=TR['Select which folders to show in the Places sidebar:'])
+        desc_label.set_halign(Gtk.Align.START)
+        desc_label.set_line_wrap(True)
+        grid.attach(desc_label, 0, 8, 3, 1)
+        
+        # Contenedor para checkboxes con scroll
+        scrolled_places = Gtk.ScrolledWindow()
+        scrolled_places.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_places.set_size_request(-1, 150)
+        grid.attach(scrolled_places, 0, 9, 3, 1)
+        
+        # Grid para checkboxes
+        places_checkbox_grid = Gtk.Grid(row_spacing=6, column_spacing=15)
+        places_checkbox_grid.set_border_width(10)
+        
+        # Diccionario de traducciones para nombres de carpetas
+        folder_translations = {
+            "Home": TR.get("Home", "Home"),
+            "Downloads": TR.get("Downloads", "Downloads"),
+            "Documents": TR.get("Documents", "Documents"),
+            "Music": TR.get("Music", "Music"),
+            "Pictures": TR.get("Pictures", "Pictures"),
+            "Videos": TR.get("Videos", "Videos"),
+            "Desktop": TR.get("Desktop", "Desktop"),
+            "Templates": TR.get("Templates", "Templates"),
+            "Public": TR.get("Public", "Public"),
+            "Recent": TR.get("Recent", "Recent")
+        }
+        
+        # Crear checkboxes para cada carpeta disponible
+        self.places_checkboxes = {}
+        visible_folders = self.config['places']['visible_folders']
+        all_folders = self.config['places']['all_available']
+        
+        for i, folder_key in enumerate(all_folders):
+            # Obtener nombre traducido
+            folder_name = folder_translations.get(folder_key, folder_key)
             
-            grid.attach(Gtk.Label(label=paths_to_config["shutdown_cmd"]), 0, 2, 1, 1)
-            entry_shutdown_cmd = Gtk.Entry()
-            entry_shutdown_cmd.set_text(self.config['paths']["shutdown_cmd"])
-            entry_shutdown_cmd.connect("changed", self.on_path_changed, "paths", "shutdown_cmd")
-            grid.attach(entry_shutdown_cmd, 1, 2, 1, 1)
-            browse_shutdown_cmd = Gtk.Button(label="...")
-            browse_shutdown_cmd.connect("clicked", self.on_browse_file, entry_shutdown_cmd, TR['Select shutdown command'])
-            grid.attach(browse_shutdown_cmd, 2, 2, 1, 1)
+            # Crear label
+            label = Gtk.Label(label=folder_name)
+            label.set_halign(Gtk.Align.START)
             
-            grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 3, 3, 1)
+            # Crear checkbox
+            checkbox = Gtk.CheckButton()
+            checkbox.set_active(folder_key in visible_folders)
+            checkbox.connect("toggled", self.on_places_checkbox_toggled, folder_key)
             
-            grid.attach(Gtk.Label(label=TR['Tray/Panel type:']), 0, 4, 1, 1)
-            tray_type_combo = Gtk.ComboBoxText()
-            tray_type_combo.append("jwm", TR['JWM Tray'])
-            tray_type_combo.append("tint2", TR['Tint2 Panel'])
-            tray_type_combo.append("xfce", TR['XFCE Panel'])
-            tray_type_combo.append("lxde", TR['LXDE Panel'])  # ← NUEVO
+            # Calcular posición (2 columnas)
+            col = i % 2
+            row = i // 2
             
-            current_tray_type = self.config.get('tray', {}).get('type', 'jwm')
-            tray_type_combo.set_active_id(current_tray_type)
-            tray_type_combo.connect("changed", self.on_tray_type_changed)
-            grid.attach(tray_type_combo, 1, 4, 1, 1)
+            places_checkbox_grid.attach(label, col * 2, row, 1, 1)
+            places_checkbox_grid.attach(checkbox, col * 2 + 1, row, 1, 1)
             
-            current_tray_type = self.config.get('tray', {}).get('type', 'jwm')
-            tray_type_combo.set_active_id(current_tray_type)
-            tray_type_combo.connect("changed", self.on_tray_type_changed)
-            grid.attach(tray_type_combo, 1, 4, 1, 1)
-            
-            # Configuración de tray (unificada)
-            tray_grid = Gtk.Grid(row_spacing=10, column_spacing=10)
-            grid.attach(tray_grid, 0, 5, 3, 1)
-            
-            # JWM Tray config
-            self.jwm_label = Gtk.Label(label=TR['JWM Tray config:'])
-            tray_grid.attach(self.jwm_label, 0, 0, 1, 1)
-            self.entry_jwmrc_tray = Gtk.Entry()
-            self.entry_jwmrc_tray.set_text(self.config['paths'].get("jwmrc_tray", "/root/.jwmrc-tray"))
-            self.entry_jwmrc_tray.connect("changed", self.on_path_changed, "paths", "jwmrc_tray")
-            tray_grid.attach(self.entry_jwmrc_tray, 1, 0, 1, 1)
-            browse_jwm = Gtk.Button(label="...")
-            browse_jwm.connect("clicked", self.on_browse_file, self.entry_jwmrc_tray, TR['Select JWM config'])
-            tray_grid.attach(browse_jwm, 2, 0, 1, 1)
-            
-            # Tint2 config
-            self.tint2_label = Gtk.Label(label=TR['Tint2 config:'])
-            tray_grid.attach(self.tint2_label, 0, 1, 1, 1)
-            self.entry_tint2rc = Gtk.Entry()
-            self.entry_tint2rc.set_text(self.config['paths'].get("tint2rc", "/root/.config/tint2/tint2rc"))
-            self.entry_tint2rc.connect("changed", self.on_path_changed, "paths", "tint2rc")
-            tray_grid.attach(self.entry_tint2rc, 1, 1, 1, 1)
-            browse_tint2 = Gtk.Button(label="...")
-            browse_tint2.connect("clicked", self.on_browse_file, self.entry_tint2rc, TR['Select Tint2 config'])
-            tray_grid.attach(browse_tint2, 2, 1, 1, 1)
-            
-            # XFCE config
-            self.xfce_label = Gtk.Label(label=TR['XFCE panel config:'])
-            tray_grid.attach(self.xfce_label, 0, 2, 1, 1)
-            self.entry_xfce_panel = Gtk.Entry()
-            self.entry_xfce_panel.set_text(self.config['paths'].get("xfce_panel", "/root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"))
-            self.entry_xfce_panel.connect("changed", self.on_path_changed, "paths", "xfce_panel")
-            tray_grid.attach(self.entry_xfce_panel, 1, 2, 1, 1)
-            browse_xfce = Gtk.Button(label="...")
-            browse_xfce.connect("clicked", self.on_browse_file, self.entry_xfce_panel, TR['Select XFCE panel config'])
-            tray_grid.attach(browse_xfce, 2, 2, 1, 1)
-            
-            # LXDE Panel config (NUEVO)
-            self.lxde_label = Gtk.Label(label=TR['LXDE panel config:'])
-            tray_grid.attach(self.lxde_label, 0, 3, 1, 1)  # Cambiar el índice según tu layout
-            self.entry_lxde_panel = Gtk.Entry()
-            self.entry_lxde_panel.set_text(self.config['paths'].get("lxde_panel", "/root/.config/lxpanel/LXDE/panels/panel"))
-            self.entry_lxde_panel.connect("changed", self.on_path_changed, "paths", "lxde_panel")
-            tray_grid.attach(self.entry_lxde_panel, 1, 3, 1, 1)
-            browse_lxde = Gtk.Button(label="...")
-            browse_lxde.connect("clicked", self.on_browse_file, self.entry_lxde_panel, TR['Select LXDE panel config'])
-            tray_grid.attach(browse_lxde, 2, 3, 1, 1)            
-            
-            # Actualizar visibilidad inicial
-            self.update_tray_widgets_sensitivity()
-            
-# === FIXED FAVORITES SECTION ===
-            fav_title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            favorites_label = Gtk.Label(label=f"<b>{TR['Favorites']}</b>")
-            favorites_label.set_use_markup(True)
-            fav_title_box.pack_start(favorites_label, False, False, 0)
-            
-            # Add button above the list so it NEVER disappears
-            btn_always_add = Gtk.Button(label=TR.get('Add favorite', 'Add favorite'))
-            btn_always_add.connect("clicked", self.on_add_favorite_clicked)
-            fav_title_box.pack_end(btn_always_add, False, False, 0)
-            
-            grid.attach(fav_title_box, 0, 9, 3, 1)
-            
-            # Favorites list
-            self.favorites_listbox = Gtk.ListBox()
-            self.favorites_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
-            
-            # The list area has its own scroll
-            fav_scroll = Gtk.ScrolledWindow()
-            fav_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-            fav_scroll.set_size_request(-1, 200) # Minimum list height
-            fav_scroll.add(self.favorites_listbox)
-            
-            grid.attach(fav_scroll, 0, 10, 3, 1)
+            self.places_checkboxes[folder_key] = checkbox
+        
+        scrolled_places.add(places_checkbox_grid)
+        
+        # Separador antes de favoritos
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 10, 3, 1)
     
-            # Wrap everything in a main scroll for Puppy Linux (small screens)
-            main_scrolled = Gtk.ScrolledWindow()
-            main_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-            main_scrolled.add(grid)
+    # === FIXED FAVORITES SECTION ===
+        fav_title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        favorites_label = Gtk.Label(label=f"<b>{TR['Favorites']}</b>")
+        favorites_label.set_use_markup(True)
+        fav_title_box.pack_start(favorites_label, False, False, 0)
+        
+        # Add button above the list so it NEVER disappears
+        btn_always_add = Gtk.Button(label=TR.get('Add favorite', 'Add favorite'))
+        btn_always_add.connect("clicked", self.on_add_favorite_clicked)
+        fav_title_box.pack_end(btn_always_add, False, False, 0)
+        
+        grid.attach(fav_title_box, 0, 11, 3, 1)
+        
+        # Favorites list
+        self.favorites_listbox = Gtk.ListBox()
+        self.favorites_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        
+        # The list area has its own scroll
+        fav_scroll = Gtk.ScrolledWindow()
+        fav_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        fav_scroll.set_size_request(-1, 200) # Minimum list height
+        fav_scroll.add(self.favorites_listbox)
+        
+        grid.attach(fav_scroll, 0, 12, 3, 1)
+    
+        # Wrap everything in a main scroll for Puppy Linux (small screens)
+        main_scrolled = Gtk.ScrolledWindow()
+        main_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        main_scrolled.add(grid)
      
-            GLib.idle_add(self.load_favorites_list)
-            
-            return main_scrolled            
+        GLib.idle_add(self.load_favorites_list)
+        
+        return main_scrolled  
+        
+    def on_places_checkbox_toggled(self, checkbox, folder_key):
+        """Manejar cambios en checkboxes de carpetas visibles"""
+        # Asegurar que existe la sección places
+        if 'places' not in self.config:
+            self.config['places'] = {}
+        if 'visible_folders' not in self.config['places']:
+            self.config['places']['visible_folders'] = []
+        
+        visible_folders = self.config['places']['visible_folders']
+        
+        if checkbox.get_active():
+            # Agregar a la lista de visibles si no está
+            if folder_key not in visible_folders:
+                visible_folders.append(folder_key)
+        else:
+            # Quitar de la lista de visibles si está
+            if folder_key in visible_folders:
+                visible_folders.remove(folder_key)
+        
+        # Guardar configuración
+        self.config_manager.save_config(self.config)
+        print(f"Carpeta '{folder_key}' {'visible' if checkbox.get_active() else 'oculta'}")                
     
     def update_tray_widgets_sensitivity(self):
         """Actualizar la visibilidad de los widgets según el tipo de tray seleccionado"""
