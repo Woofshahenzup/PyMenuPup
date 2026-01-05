@@ -521,18 +521,20 @@ class ConfigWindow(Gtk.Window):
         scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add(grid)
         return scrolled_window
-
+        
     def create_paths_tab(self):
         grid = Gtk.Grid(row_spacing=10, column_spacing=10)
         grid.set_border_width(10)
         
+        # AÑADIR LXDE AL DICCIONARIO
         paths_to_config = {
             "profile_pic": TR['Profile pic path:'],
             "profile_manager": TR['Profile manager:'],
             "shutdown_cmd": TR['Shutdown command:'],
             "jwmrc_tray": TR['JWM Tray config:'],
             "tint2rc": TR['Tint2 config:'],
-            "xfce_panel": TR['XFCE panel config:'] 
+            "xfce_panel": TR['XFCE panel config:'],
+            "lxde_panel": TR['LXDE panel config:']  # ← AÑADIDO
         }
         
         # --- Configuración de Rutas Generales ---
@@ -565,21 +567,42 @@ class ConfigWindow(Gtk.Window):
         
         grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 3, 3, 1)
         
-        grid.attach(Gtk.Label(label=TR['Tray/Panel type:']), 0, 4, 1, 1)
+        # === MOTOR DE BÚSQUEDA (ANTES DEL TRAY) ===
+        grid.attach(Gtk.Label(label=TR['Search engine:']), 0, 4, 1, 1)
+        search_engine_combo = Gtk.ComboBoxText()
+        
+        # Agregar los motores de búsqueda
+        search_engine_combo.append("duckduckgo", "DuckDuckGo")
+        search_engine_combo.append("google", "Google")
+        search_engine_combo.append("bing", "Bing")
+        search_engine_combo.append("yahoo", "Yahoo")
+        search_engine_combo.append("startpage", "Startpage")
+        search_engine_combo.append("ecosia", "Ecosia")
+        search_engine_combo.append("brave", "Brave Search")
+        
+        # Establecer el motor actual (si existe)
+        current_engine = self.config.get('search_engine', {}).get('engine', 'duckduckgo')
+        search_engine_combo.set_active_id(current_engine)
+        search_engine_combo.connect("changed", self.on_search_engine_changed)
+        grid.attach(search_engine_combo, 1, 4, 1, 1)
+        
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 5, 3, 1)  # CORREGIDO
+        
+        grid.attach(Gtk.Label(label=TR['Tray/Panel type:']), 0, 6, 1, 1)  # CORREGIDO
         tray_type_combo = Gtk.ComboBoxText()
         tray_type_combo.append("jwm", TR['JWM Tray'])
         tray_type_combo.append("tint2", TR['Tint2 Panel'])
         tray_type_combo.append("xfce", TR['XFCE Panel'])
-        tray_type_combo.append("lxde", TR['LXDE Panel'])  # ← NUEVO
+        tray_type_combo.append("lxde", TR['LXDE Panel'])
         
         current_tray_type = self.config.get('tray', {}).get('type', 'jwm')
         tray_type_combo.set_active_id(current_tray_type)
         tray_type_combo.connect("changed", self.on_tray_type_changed)
-        grid.attach(tray_type_combo, 1, 4, 1, 1)
+        grid.attach(tray_type_combo, 1, 6, 1, 1)  # CORREGIDO
         
         # Configuración de tray (unificada)
         tray_grid = Gtk.Grid(row_spacing=10, column_spacing=10)
-        grid.attach(tray_grid, 0, 5, 3, 1)
+        grid.attach(tray_grid, 0, 7, 3, 1)  # CORREGIDO
         
         # JWM Tray config
         self.jwm_label = Gtk.Label(label=TR['JWM Tray config:'])
@@ -614,7 +637,7 @@ class ConfigWindow(Gtk.Window):
         browse_xfce.connect("clicked", self.on_browse_file, self.entry_xfce_panel, TR['Select XFCE panel config'])
         tray_grid.attach(browse_xfce, 2, 2, 1, 1)
         
-        # LXDE Panel config (NUEVO)
+        # LXDE Panel config
         self.lxde_label = Gtk.Label(label=TR['LXDE panel config:'])
         tray_grid.attach(self.lxde_label, 0, 3, 1, 1)
         self.entry_lxde_panel = Gtk.Entry()
@@ -623,10 +646,13 @@ class ConfigWindow(Gtk.Window):
         tray_grid.attach(self.entry_lxde_panel, 1, 3, 1, 1)
         browse_lxde = Gtk.Button(label="...")
         browse_lxde.connect("clicked", self.on_browse_file, self.entry_lxde_panel, TR['Select LXDE panel config'])
-        tray_grid.attach(browse_lxde, 2, 3, 1, 1)            
+        tray_grid.attach(browse_lxde, 2, 3, 1, 1)
+        
+        # Actualizar visibilidad inicial
+        self.update_tray_widgets_sensitivity()
         
         # Separador antes de la sección de carpetas visibles
-        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 6, 3, 1)
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 8, 3, 1)  # CORREGIDO
         
         # === NUEVA SECCIÓN: CARPETAS VISIBLES EN PLACES ===
         # Asegurar que existe la configuración de carpetas
@@ -642,19 +668,19 @@ class ConfigWindow(Gtk.Window):
         places_title_label = Gtk.Label()
         places_title_label.set_markup(f"<b>{TR['Visible Folders in Places Sidebar']}</b>")
         places_title_label.set_halign(Gtk.Align.START)
-        grid.attach(places_title_label, 0, 7, 3, 1)
+        grid.attach(places_title_label, 0, 9, 3, 1)  # CORREGIDO
         
         # Descripción
         desc_label = Gtk.Label(label=TR['Select which folders to show in the Places sidebar:'])
         desc_label.set_halign(Gtk.Align.START)
         desc_label.set_line_wrap(True)
-        grid.attach(desc_label, 0, 8, 3, 1)
+        grid.attach(desc_label, 0, 10, 3, 1)  # CORREGIDO
         
         # Contenedor para checkboxes con scroll
         scrolled_places = Gtk.ScrolledWindow()
         scrolled_places.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled_places.set_size_request(-1, 150)
-        grid.attach(scrolled_places, 0, 9, 3, 1)
+        grid.attach(scrolled_places, 0, 11, 3, 1)  # CORREGIDO
         
         # Grid para checkboxes
         places_checkbox_grid = Gtk.Grid(row_spacing=6, column_spacing=15)
@@ -704,9 +730,9 @@ class ConfigWindow(Gtk.Window):
         scrolled_places.add(places_checkbox_grid)
         
         # Separador antes de favoritos
-        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 10, 3, 1)
+        grid.attach(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), 0, 12, 3, 1)  # CORREGIDO
     
-    # === FIXED FAVORITES SECTION ===
+        # === FIXED FAVORITES SECTION ===
         fav_title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         favorites_label = Gtk.Label(label=f"<b>{TR['Favorites']}</b>")
         favorites_label.set_use_markup(True)
@@ -717,7 +743,7 @@ class ConfigWindow(Gtk.Window):
         btn_always_add.connect("clicked", self.on_add_favorite_clicked)
         fav_title_box.pack_end(btn_always_add, False, False, 0)
         
-        grid.attach(fav_title_box, 0, 11, 3, 1)
+        grid.attach(fav_title_box, 0, 13, 3, 1)  # CORREGIDO
         
         # Favorites list
         self.favorites_listbox = Gtk.ListBox()
@@ -729,7 +755,7 @@ class ConfigWindow(Gtk.Window):
         fav_scroll.set_size_request(-1, 200) # Minimum list height
         fav_scroll.add(self.favorites_listbox)
         
-        grid.attach(fav_scroll, 0, 12, 3, 1)
+        grid.attach(fav_scroll, 0, 14, 3, 1)  # CORREGIDO
     
         # Wrap everything in a main scroll for Puppy Linux (small screens)
         main_scrolled = Gtk.ScrolledWindow()
@@ -738,7 +764,7 @@ class ConfigWindow(Gtk.Window):
      
         GLib.idle_add(self.load_favorites_list)
         
-        return main_scrolled  
+        return main_scrolled
         
     def on_places_checkbox_toggled(self, checkbox, folder_key):
         """Manejar cambios en checkboxes de carpetas visibles"""
