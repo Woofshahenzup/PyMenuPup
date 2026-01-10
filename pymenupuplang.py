@@ -239,8 +239,6 @@ class TranslationManager:
             # Si no encuentra archivo, intenta solo con el idioma base
             base_lang = self.current_lang.split('-')[0] if '-' in self.current_lang else self.current_lang
             if base_lang != 'en':
-                print(f"⚠️  No se encontró archivo de traducción para '{self.current_lang}'")
-                print(f"   Buscado en: {', '.join(self.locale_paths)}")
                 print(f"   Usando traducciones por defecto (inglés)")
     
     def get(self, key, default=None):

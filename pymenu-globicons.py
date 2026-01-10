@@ -1701,34 +1701,45 @@ class ArcMenuLauncher(Gtk.Window):
         # 3. SEPARADOR Y FAVORITOS
         places_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 5)
         
-        # ===== AGREGAR FAVORITOS =====
+# ===== AGREGAR FAVORITOS =====
         favorites = self.config.get('favorites', [])
         if favorites:
             # Crear un contenedor especial para toda la sección de favoritos
             favorites_section_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             
             # Título de favoritos
-            # Buscar ícono personalizado para favoritos
+            # 1. Leer el tema de iconos actual desde /etc/desktop_icon_theme
+            current_theme = None
+            theme_file = '/etc/desktop_icon_theme'
+            if os.path.exists(theme_file):
+                try:
+                    with open(theme_file, 'r') as f:
+                        current_theme = f.read().strip()
+                except Exception as e:
+                    print(f"Error leyendo tema de iconos: {e}")
+            
+            # 2. Buscar ícono DIRECTAMENTE en la carpeta del tema actual
             favorites_icon_path = None
-            search_paths = [
-                '/usr/local/lib/X11/pixmaps/',
-                '/usr/share/pixmaps/',
-                '/usr/share/pixmaps/puppy/'
-            ]
+            favorites_icon_names = ['favorites48', 'bookmarks48', 'favorites', 'bookmarks']
+            icon_extensions = ['.png', '.svg', '.xpm']
             
-            # Buscar archivos de íconos posibles
-            favorites_icon_files = ['favorites48.png', 'favorites.png', 'bookmarks48.png', 
-                                   'bookmarks.png', 'favorites.xpm', 'bookmarks.xpm']
-            
-            for search_path in search_paths:
-                if os.path.exists(search_path):
-                    for icon_file in favorites_icon_files:
-                        test_path = os.path.join(search_path, icon_file)
-                        if os.path.exists(test_path):
-                            favorites_icon_path = test_path
+            if current_theme:
+                theme_base_path = f'/usr/local/lib/X11/themes/{current_theme}'
+                
+                if os.path.exists(theme_base_path):
+                    for icon_name in favorites_icon_names:
+                        for ext in icon_extensions:
+                            test_path = os.path.join(theme_base_path, f"{icon_name}{ext}")
+                            if os.path.exists(test_path):
+                                favorites_icon_path = test_path
+                                break
+                        if favorites_icon_path:
                             break
-                    if favorites_icon_path:
-                        break
+                else:
+                    print(f"⚠️  Carpeta del tema no existe: {theme_base_path}")
+            
+            # 3. Si NO se encuentra en el tema, usar directamente el fallback
+            # NO buscar en pixmaps porque puede tener el ícono viejo de otro tema
             
             # Crear caja horizontal para ícono + texto
             title_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -1742,7 +1753,6 @@ class ArcMenuLauncher(Gtk.Window):
                     icon_image = Gtk.Image.new_from_pixbuf(pixbuf)
                     title_hbox.pack_start(icon_image, False, False, 0)
                 except Exception as e:
-                    print(f"Error cargando ícono de favoritos: {e}")
                     # Fallback a emoji estrella
                     star_label = Gtk.Label(label="⭐")
                     title_hbox.pack_start(star_label, False, False, 0)
