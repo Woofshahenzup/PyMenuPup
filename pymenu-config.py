@@ -48,7 +48,6 @@ class ConfigManager:
                 "hide_favorites": False, 
                 "search_bar_position": "bottom",
                 "search_bar_container": "apps_column",
-                "hide_quick_access": True,
                 "hide_social_networks": True,
                 "halign": "left",
                 "icon_size": 32,
@@ -288,18 +287,12 @@ class ConfigWindow(Gtk.Window):
         hide_app_names_check.set_active(self.config['window'].get('hide_app_names', False))
         hide_app_names_check.connect("toggled", self.on_check_toggled, 'window', 'hide_app_names')
         grid.attach(hide_app_names_check, 1, 11, 1, 1)
-        
-        grid.attach(Gtk.Label(label=TR['Hide quick access:']), 0, 12, 1, 1)
-        hide_quick_check = Gtk.CheckButton()
-        hide_quick_check.set_active(self.config['window'].get('hide_quick_access', False))
-        hide_quick_check.connect("toggled", self.on_check_toggled, "window", "hide_quick_access")
-        grid.attach(hide_quick_check, 1, 12, 1, 1)
-        
-        grid.attach(Gtk.Label(label=TR['Hide social networks:']), 0, 13, 1, 1)
+                
+        grid.attach(Gtk.Label(label=TR['Hide social networks:']), 0, 12, 1, 1)
         hide_social_check = Gtk.CheckButton()
         hide_social_check.set_active(self.config['window'].get('hide_social_networks', False))
         hide_social_check.connect("toggled", self.on_check_toggled, "window", "hide_social_networks")
-        grid.attach(hide_social_check, 1, 13, 1, 1)
+        grid.attach(hide_social_check, 1, 12, 1, 1)
         
         # ===== NUEVAS OPCIONES COMBINADAS =====
         
@@ -308,66 +301,66 @@ class ConfigWindow(Gtk.Window):
         places_label = Gtk.Label(label=places_label_text)
         places_label.set_halign(Gtk.Align.START)
         places_label.set_line_wrap(True)
-        grid.attach(places_label, 0, 14, 1, 1)
+        grid.attach(places_label, 0, 13, 1, 1)
         
         hide_places_check = Gtk.CheckButton()
         hide_places_check.set_active(self.config['window'].get('hide_places', False))
         hide_places_check.connect("toggled", self.on_check_toggled, "window", "hide_places")
-        grid.attach(hide_places_check, 1, 14, 1, 1)
+        grid.attach(hide_places_check, 1, 13, 1, 1)
         
         # Hide favorites only (solo si places está visible)
         favorites_label_text = TR['Hide favorites only:'] + '\n' + TR['(Show places but hide favorites)']
         favorites_label = Gtk.Label(label=favorites_label_text)
         favorites_label.set_halign(Gtk.Align.START)
         favorites_label.set_line_wrap(True)
-        grid.attach(favorites_label, 0, 15, 1, 1)
+        grid.attach(favorites_label, 0, 14, 1, 1)
         
         hide_favorites_check = Gtk.CheckButton()
         hide_favorites_check.set_active(self.config['window'].get('hide_favorites', False))
         hide_favorites_check.connect("toggled", self.on_check_toggled, "window", "hide_favorites")
-        grid.attach(hide_favorites_check, 1, 15, 1, 1)
+        grid.attach(hide_favorites_check, 1, 14, 1, 1)
         
         # Profile in places (mover perfil a la columna Places)
         profile_places_label_text = TR['Show profile in places sidebar:'] + '\n' + TR['(Instead of header)']
         profile_places_label = Gtk.Label(label=profile_places_label_text)
         profile_places_label.set_halign(Gtk.Align.START)
         profile_places_label.set_line_wrap(True)
-        grid.attach(profile_places_label, 0, 16, 1, 1)
+        grid.attach(profile_places_label, 0, 15, 1, 1)
         
         profile_in_places_check = Gtk.CheckButton()
         profile_in_places_check.set_active(self.config['window'].get('profile_in_places', True))
         profile_in_places_check.connect("toggled", self.on_check_toggled, "window", "profile_in_places")
-        grid.attach(profile_in_places_check, 1, 16, 1, 1)
+        grid.attach(profile_in_places_check, 1, 15, 1, 1)
 
         # Icon size (FALTANTE - AGREGADA)
-        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 17, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Icon size:']), 0, 16, 1, 1)
         icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         icon_size_spin.set_value(self.config['window'].get('icon_size', 32))
         icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "icon_size")
-        grid.attach(icon_size_spin, 1, 17, 1, 1)
+        grid.attach(icon_size_spin, 1, 16, 1, 1)
 
-        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 18, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Category icon size:']), 0, 17, 1, 1)
         category_icon_size_spin = Gtk.SpinButton.new_with_range(16, 64, 8)
         category_icon_size_spin.set_value(self.config['window'].get('category_icon_size', 24))
         category_icon_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "category_icon_size")
-        grid.attach(category_icon_size_spin, 1, 18, 1, 1)
+        grid.attach(category_icon_size_spin, 1, 17, 1, 1)
 
-        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 19, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Profile pic size:']), 0, 18, 1, 1)
         profile_pic_size_spin = Gtk.SpinButton.new_with_range(64, 256, 8)
         profile_pic_size_spin.set_value(self.config['window'].get('profile_pic_size', 128))
         profile_pic_size_spin.connect("value-changed", self.on_spin_button_changed, "window", "profile_pic_size")
-        grid.attach(profile_pic_size_spin, 1, 19, 1, 1)
+        grid.attach(profile_pic_size_spin, 1, 18, 1, 1)
         
-        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 20, 1, 1)    
+        grid.attach(Gtk.Label(label=TR['Profile pic shape:']), 0, 19, 1, 1)    
         combobox = Gtk.ComboBoxText()
         combobox.append("square", TR.get('square', 'Cuadrada'))
         combobox.append("circular", TR.get('circular', 'Circular'))       
         current_shape = self.config['window'].get('profile_pic_shape', 'square')
         combobox.set_active_id(current_shape)
         combobox.connect("changed", self.on_combobox_changed, 'window', 'profile_pic_shape')
-        grid.attach(combobox, 1, 20, 1, 1)
+        grid.attach(combobox, 1, 19, 1, 1)
 
-        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 21, 1, 1) 
+        grid.attach(Gtk.Label(label=TR['Horizontal alignment:']), 0, 20, 1, 1) 
         halign_combo = Gtk.ComboBoxText()
         halign_options = ["center", "left", "right"]
         for option in halign_options:
@@ -379,26 +372,26 @@ class ConfigWindow(Gtk.Window):
         except ValueError:
             halign_combo.set_active(0)
         halign_combo.connect("changed", self.on_combo_changed, "window", "halign")
-        grid.attach(halign_combo, 1, 21, 1, 1) 
+        grid.attach(halign_combo, 1, 20, 1, 1) 
         
-        grid.attach(Gtk.Label(label=TR['Search bar position:']), 0, 22, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Search bar position:']), 0, 21, 1, 1)
         searchbar_combo = Gtk.ComboBoxText()
         searchbar_combo.append("top", TR['top'])
         searchbar_combo.append("bottom", TR['bottom'])
         current_searchbar = self.config['window'].get('search_bar_position', 'bottom')
         searchbar_combo.set_active_id(current_searchbar)
         searchbar_combo.connect("changed", self.on_combobox_changed, 'window', 'search_bar_position')
-        grid.attach(searchbar_combo, 1, 22, 1, 1)
+        grid.attach(searchbar_combo, 1, 21, 1, 1)
         
 # ← NUEVO: Control para search_bar_container
-        grid.attach(Gtk.Label(label=TR['Search bar container:']), 0, 23, 1, 1)
+        grid.attach(Gtk.Label(label=TR['Search bar container:']), 0, 22, 1, 1)
         container_combo = Gtk.ComboBoxText()
         container_combo.append("window", TR['In window'])
         container_combo.append("apps_column", TR['In applications column'])
         current_container = self.config['window'].get('search_bar_container', 'window')
         container_combo.set_active_id(current_container)
         container_combo.connect("changed", self.on_combobox_changed, 'window', 'search_bar_container')
-        grid.attach(container_combo, 1, 23, 1, 1)      
+        grid.attach(container_combo, 1, 22, 1, 1)      
 
         # [CORRECCIÓN] Envolver el grid en un ScrolledWindow
         scrolled_window = Gtk.ScrolledWindow()

@@ -91,7 +91,6 @@ class ConfigManager:
                 "hide_favorites": False, 
                 "search_bar_position": "bottom",
                 "search_bar_container": "apps_column",
-                "hide_quick_access": True,
                 "hide_social_networks": True,
                 "halign": "left",
                 "icon_size": 32,
@@ -315,6 +314,8 @@ class JWMMenuParser:
             use_xfce = True
             use_lxde = False
             print(f"🔍 {TR['Window Manager detected:']} XFCE → {TR['Automatically using XFCE config']}")
+            # Guardar ruta del config para monitorear después
+            self.xfce_config_file = os.path.expanduser("~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml")
         elif detected_wm == 'lxde':
             use_tint2 = False
             use_xfce = False
@@ -533,10 +534,9 @@ class JWMMenuParser:
             return self.get_fallback_applications()
             
     def parse_xfce_panel_config(self):
-        """Parse XFCE panel configuration to get position and size"""
-        xfce_config = {}
+        """Parse XFCE panel configuration - supports multiple panels"""
+        xfce_config = None
         
-        # Rutas comunes de configuración de XFCE
         xfce_config_paths = [
             os.path.expanduser("~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"),
             "/etc/xdg/xfce4/panel/default.xml",
@@ -549,44 +549,99 @@ class JWMMenuParser:
                     tree = ET.parse(config_file)
                     root = tree.getroot()
                     
-                    # Buscar propiedades del panel
-                    for property_elem in root.findall(".//property[@name='panel-1']"):
-                        for property_child in property_elem.findall(".//property[@type='int']"):
-                            name = property_child.get('name', '')
-                            value = property_child.get('value', '')
-                            
-                            if name == 'size':
-                                xfce_config['height'] = int(value)
-                            elif name == 'length':
-                                xfce_config['width'] = int(value)
+                    # Buscar TODOS los paneles manualmente (panel-1, panel-2, etc.)
+                    # No podemos usar starts-with() en ElementTree
+                    all_properties = root.findall(".//property")
+                    panels = [p for p in all_properties if p.get('name', '').startswith('panel-')]
                     
-                    # Buscar posición del panel
-                    for property_elem in root.findall(".//property[@name='panel-1']/property[@name='position']"):
-                        position = property_elem.get('value', 'p=6;')
-                        # Parsear posición (ejemplo: "p=6;" significa bottom)
-                        if 'p=6' in position or 'p=8' in position:  # Bottom
-                            xfce_config['valign'] = 'bottom'
-                        elif 'p=12' in position or 'p=2' in position:  # Top
-                            xfce_config['valign'] = 'top'
-                        else:
-                            xfce_config['valign'] = 'bottom'  # Default
+                    print(f"🔍 DEBUG: Encontrados {len(panels)} paneles en {config_file}")
+                    
+                    for panel in panels:
+                        panel_name = panel.get('name')
+                        temp_config = {}
                         
-                        # Determinar alineación horizontal
-                        if 'l=1' in position:  # Left
-                            xfce_config['halign'] = 'left'
-                        elif 'r=1' in position:  # Right
-                            xfce_config['halign'] = 'right'
-                        else:
-                            xfce_config['halign'] = 'center'  # Center
+                        # Tamaño
+                        size_elem = panel.find(".//property[@name='size']")
+                        if size_elem is not None:
+                            temp_config['height'] = int(size_elem.get('value', '30'))
+                        
+                        # Longitud
+                        length_elem = panel.find(".//property[@name='length']")
+                        if length_elem is not None:
+                            try:
+                                length_percent = float(length_elem.get('value', '100'))
+                                temp_config['width'] = int(1920 * (length_percent / 100))
+                            except ValueError:
+                                temp_config['width'] = 1300
+                        
+                        # Posición
+                        position_elem = panel.find(".//property[@name='position']")
+                        if position_elem is not None:
+                            position = position_elem.get('value', 'p=6;')
+                            
+                            print(f"🔍 DEBUG: {panel_name} position = '{position}'")
+                            
+                            # WORKAROUND: Usar coordenada Y como fallback
+                            y_coord = None
+                            if 'y=' in position:
+                                try:
+                                    y_str = position.split('y=')[1].split(';')[0]
+                                    y_coord = int(y_str)
+                                    print(f"   → Y coordinate: {y_coord}")
+                                except:
+                                    pass
+                            
+                            if 'p=' in position:
+                                p_value = position.split('p=')[1].split(';')[0]
+                                try:
+                                    p_int = int(p_value)
+                                    
+                                    # Top positions: 12, 2, 4
+                                    if p_int in [12, 2, 4]:
+                                        temp_config['valign'] = 'top'
+                                    # Bottom positions: 6, 8, 10
+                                    elif p_int in [6, 8, 10]:
+                                        temp_config['valign'] = 'bottom'
+                                    else:
+                                        temp_config['valign'] = 'bottom'
+                                    
+                                    # Horizontal alignment
+                                    if p_int in [8, 12]:  # Left
+                                        temp_config['halign'] = 'left'
+                                    elif p_int in [10, 4]:  # Right
+                                        temp_config['halign'] = 'right'
+                                    else:  # Center
+                                        temp_config['halign'] = 'center'
+                                    
+                                    # WORKAROUND: Si Y es bajo (<100), forzar TOP
+                                    if y_coord is not None and y_coord < 100:
+                                        temp_config['valign'] = 'top'
+                                        print(f"   ⚠️  XML dice bottom pero Y={y_coord} indica TOP - corrigiendo")
+                                    
+                                    print(f"   → Detectado: {temp_config.get('valign')} {temp_config.get('halign')}, altura {temp_config.get('height')}px")
+                                    
+                                except ValueError:
+                                    temp_config['valign'] = 'bottom'
+                                    temp_config['halign'] = 'center'
+                        
+                        # ESTRATEGIA: Usar el panel TOP si existe, sino usar el primero que encuentre
+                        if temp_config.get('valign') == 'top':
+                            xfce_config = temp_config
+                            print(f"✅ Usando {panel_name} (TOP) para posicionar el menú")
+                            break  # Priorizar panel superior
+                        elif xfce_config is None:
+                            xfce_config = temp_config
                     
                     if xfce_config:
                         return xfce_config
                         
                 except Exception as e:
                     print(f"❌ Error parsing XFCE config {config_file}: {e}")
+                    import traceback
+                    traceback.print_exc()
                     continue
         
-        return None            
+        return None         
     
     def extract_icon_paths(self, root):
         """Extract icon paths from JWM config"""
@@ -765,7 +820,14 @@ class ArcMenuLauncher(Gtk.Window):
         self.file_monitor = self.jwm_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
         self.file_monitor.connect("changed", self.on_jwm_file_changed)
         print(f"{TR['Now monitoring JWM file for changes:']} {jwm_file_path}")
-
+        if hasattr(self.parser, 'xfce_config_file') and os.path.exists(self.parser.xfce_config_file):
+            try:
+                xfce_file = Gio.File.new_for_path(self.parser.xfce_config_file)
+                self.xfce_monitor = xfce_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
+                self.xfce_monitor.connect("changed", self.on_xfce_panel_changed)
+                print(f"👀 Monitoreando cambios XFCE panel: {self.parser.xfce_config_file}")
+            except Exception as e:
+                print(f"⚠️  Error monitoreando XFCE: {e}")
     def apply_css(self):
         """Loads and applies CSS from the configuration."""
         # Verificar si debe usar tema GTK
@@ -953,6 +1015,16 @@ class ArcMenuLauncher(Gtk.Window):
             self.create_interface()
             self.show_all()
             self.present()
+
+            
+    def on_xfce_panel_changed(self, monitor, file, other_file, event_type):
+        """Reposicionar menú cuando cambia la configuración del panel XFCE"""
+        if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
+            print("🔄 Panel XFCE cambió, reposicionando menú...")
+            self.tray_config = self.parser.parse_tray_config()
+            x, y = self.calculate_menu_position()
+            self.move(x, y)
+            print(f"📍 Nueva posición: ({x}, {y})")       
 
     def get_hostname(self):
         """Get the system hostname from /etc/hostname"""
@@ -1148,13 +1220,6 @@ class ArcMenuLauncher(Gtk.Window):
  #           main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
   
         content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        # NUEVA SECCIÓN: Botones de acceso rápido (independiente del header)
-        # Quick access — solo mostrar si no está oculto en la config
-        if not self.config['window'].get('hide_quick_access', False):
-            quick_access_container = self.create_quick_access_container()
-            main_box.pack_start(quick_access_container, False, False, 0)
-            main_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
-
         
         main_box.pack_start(content_box, True, True, 0)
     
@@ -1508,62 +1573,7 @@ class ArcMenuLauncher(Gtk.Window):
         
         header_box.pack_start(system_info_box, True, True, 0)
         return header_box   
-            
-    def create_quick_access_buttons(self):
-        """Crear botones de acceso rápido con nerd fonts y rutas localizadas"""
-        
-        quick_access_items = [
-            ('󰉍', 'DownloadsDir'),
-            ('󰲂', 'DocumentsDir'),
-            ('󰎆', 'MusicDir'),
-            ('', 'VideosDir'),
-            ('󰋩', 'PicturesDir'),
-        ]
-        
-        quick_access_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
-        quick_access_box.set_halign(Gtk.Align.END)
-        
-        from gi.repository import Pango
-        
-        for icon, dir_key in quick_access_items:
-            button = Gtk.Button()
-            button.set_relief(Gtk.ReliefStyle.NONE)
-            button.get_style_context().add_class('quick-access-button')
-        
-            translated_dir_name = TR[dir_key] 
-            path = f"~/{translated_dir_name}" 
-        
-            icon_label = Gtk.Label(label=icon) 
-            font = Pango.FontDescription()
-            font.set_family("Terminess Nerd Font Propo")
-            font.set_size(12 * Pango.SCALE)
-            icon_label.override_font(font)
-            icon_label.set_name("quick-access-icon")
-            icon_label.set_halign(Gtk.Align.CENTER)
-            
-            button.add(icon_label)
-            button.connect("clicked", lambda b, p=path: open_directory(p)) 
-            button.set_tooltip_text(translated_dir_name)
-            
-            # 👉 Usar pack_start para mantener el orden correcto
-            quick_access_box.pack_start(button, False, False, 0)
-            
-        return quick_access_box
-
-    def create_quick_access_container(self):
-        container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        container.set_margin_top(5)
-        container.set_margin_bottom(5)
-        container.set_margin_start(10)
-        container.set_margin_end(10)
-        
-        quick_access_box = self.create_quick_access_buttons()
-        # 👉 aquí sí usamos pack_end para mandarlo a la derecha
-        container.pack_end(quick_access_box, False, False, 0)
-        
-        return container
-        
-        
+                   
     def create_social_networks_sidebar(self):
         """Crear botones de redes sociales verticales para la barra lateral con scroll automático"""
         
@@ -1698,11 +1708,58 @@ class ArcMenuLauncher(Gtk.Window):
             favorites_section_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             
             # Título de favoritos
-            fav_title_label = Gtk.Label(label="⭐ " + TR.get('Favorites', 'Favorites'))
-            fav_title_label.set_halign(Gtk.Align.START)
-            fav_title_label.set_margin_start(5)
-            fav_title_label.override_font(font_desc)
-            favorites_section_box.pack_start(fav_title_label, False, False, 2)
+            # Buscar ícono personalizado para favoritos
+            favorites_icon_path = None
+            search_paths = [
+                '/usr/local/lib/X11/pixmaps/',
+                '/usr/share/pixmaps/',
+                '/usr/share/pixmaps/puppy/'
+            ]
+            
+            # Buscar archivos de íconos posibles
+            favorites_icon_files = ['favorites48.png', 'favorites.png', 'bookmarks48.png', 
+                                   'bookmarks.png', 'favorites.xpm', 'bookmarks.xpm']
+            
+            for search_path in search_paths:
+                if os.path.exists(search_path):
+                    for icon_file in favorites_icon_files:
+                        test_path = os.path.join(search_path, icon_file)
+                        if os.path.exists(test_path):
+                            favorites_icon_path = test_path
+                            break
+                    if favorites_icon_path:
+                        break
+            
+            # Crear caja horizontal para ícono + texto
+            title_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+            title_hbox.set_halign(Gtk.Align.START)
+            title_hbox.set_margin_start(5)
+            
+            # Agregar ícono si se encontró
+            if favorites_icon_path:
+                try:
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(favorites_icon_path, 24, 24)
+                    icon_image = Gtk.Image.new_from_pixbuf(pixbuf)
+                    title_hbox.pack_start(icon_image, False, False, 0)
+                except Exception as e:
+                    print(f"Error cargando ícono de favoritos: {e}")
+                    # Fallback a emoji estrella
+                    star_label = Gtk.Label(label="⭐")
+                    title_hbox.pack_start(star_label, False, False, 0)
+            else:
+                # Si no hay ícono personalizado, usar emoji estrella
+                star_label = Gtk.Label(label="⭐")
+                title_hbox.pack_start(star_label, False, False, 0)
+            
+            # AGREGAR EL TEXTO "Favorites" después del ícono
+            fav_text_label = Gtk.Label(label=TR.get('Favorites', 'Favorites'))
+            fav_text_label.set_halign(Gtk.Align.START)
+            fav_text_label.override_font(font_desc)  # Usar la misma fuente que antes
+            title_hbox.pack_start(fav_text_label, False, False, 0)
+            
+            # En lugar de usar solo el label, usamos la caja horizontal
+            # favorites_section_box.pack_start(fav_title_label, False, False, 2)
+            favorites_section_box.pack_start(title_hbox, False, False, 2)
             
             # Contenedor para los botones de favoritos
             favorites_buttons_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
