@@ -40,7 +40,14 @@ gi.require_version('Pango', '1.0')
 from gi.repository import Pango
 
 CONFIG_FILE = "/root/.config/pymenu.json"
-
+# RUTAS PARA FLATPAK
+FLATPAK_ICON_DIRS = [
+    "/var/lib/flatpak/exports/share/icons/hicolor/48x48/apps",
+    "/var/lib/flatpak/exports/share/icons/hicolor/scalable/apps",
+    "/var/lib/flatpak/exports/share/icons/hicolor/32x32/apps",
+    "/var/lib/flatpak/exports/share/icons/hicolor/64x64/apps"
+]
+FLATPAK_APPLICATIONS_DIR = "/var/lib/flatpak/exports/share/applications"
 
 def open_directory(path):
     """
@@ -283,6 +290,8 @@ class JWMMenuParser:
         self.applications = {}
         self.icon_paths = []
         self.tray_config = None
+        self.flatpak_monitors = []
+        self.flatpak_apps_cache = []
         
     def parse_tray_config(self):
         """Parse tint2, XFCE, LXDE or JWM config based on user preference to get tray position and size"""
@@ -326,7 +335,7 @@ class JWMMenuParser:
             use_tint2 = config.get('tray', {}).get('use_tint2', False)
             use_xfce = config.get('tray', {}).get('use_xfce', False)
             use_lxde = config.get('tray', {}).get('use_lxde', False)
-            print(f"🔍 Window Manager detectado: JWM → Usando configuración del usuario (use_tint2={use_tint2}, use_xfce={use_xfce}, use_lxde={use_lxde})")
+            print(f"🔍 {TR['Window Manager detected:']} JWM → {TR['Using user configuration']} (use_tint2={use_tint2}, use_xfce={use_xfce}, use_lxde={use_lxde})")
         
         # PRIMERO: Intentar con XFCE si está configurado o detectado
         if use_xfce or detected_wm == 'xfce':
@@ -334,7 +343,7 @@ class JWMMenuParser:
             if xfce_config:
                 tray_info.update(xfce_config)
                 tray_info['source'] = 'xfce'
-                print(f"✅ Configuración de panel detectada desde XFCE: {tray_info}")
+                print(f"✅ {TR['Panel configuration detected from XFCE:']} {tray_info}")
                 self.tray_config = tray_info
                 return tray_info
         
@@ -344,7 +353,7 @@ class JWMMenuParser:
             if lxde_config:
                 tray_info.update(lxde_config)
                 tray_info['source'] = 'lxde'
-                print(f"✅ Configuración de panel detectada desde LXDE: {tray_info}")
+                print(f"✅ {TR['Panel configuration detected from LXDE:']} {tray_info}")
                 self.tray_config = tray_info
                 return tray_info
         
@@ -387,16 +396,16 @@ class JWMMenuParser:
                                             tray_info['halign'] = halign
                     
                     tray_info['source'] = 'tint2'
-                    print(f"✅ Configuración de tray detectada desde tint2rc: {tray_info}")
+                    print(f"✅ {TR['Tray configuration detected from tint2rc:']} {tray_info}")
                     self.tray_config = tray_info
                     return tray_info
                     
                 except Exception as e:
-                    print(f"❌ Error parsing tint2 config: {e}")
+                    print(f"❌ {TR['Error parsing tint2 config:']} {e}")
             else:
-                print(f"⚠️ Tint2 config no encontrado en: {tint2_config}")
+                print(f"⚠️ {TR['Tint2 config not found at:']} {tint2_config}")
         
-        # TERCERO: Si no usa XFCE o Tint2, o fallaron, intentar con JWM
+        # CUARTO: Si no usa XFCE, LXDE o Tint2, o fallaron, intentar con JWM
         try:
             jwm_tray_file = config.get('paths', {}).get('jwmrc_tray', os.path.expanduser("/usr/share/jwm/jwm/jwmrc-tray"))
             jwm_tray_file = os.path.expanduser(jwm_tray_file)
@@ -407,7 +416,7 @@ class JWMMenuParser:
                 target_file = self.jwm_file
     
             if not os.path.exists(target_file):
-                print(f"JWM file not found: {target_file}")
+                print(f"{TR['JWM file not found:']} {target_file}")
                 self.tray_config = tray_info
                 return tray_info
     
@@ -424,10 +433,10 @@ class JWMMenuParser:
                 tray_info['autohide'] = tray_element.get('autohide', 'off').lower()
                 tray_info['source'] = 'jwm'
     
-                print(f"✅ Configuración de tray detectada desde {target_file}: {tray_info}")
+                print(f"✅ {TR['Tray configuration detected from']} {target_file}: {tray_info}")
     
         except Exception as e:
-            print(f"❌ Error parsing JWM tray config: {e}")
+            print(f"❌ {TR['Error parsing JWM tray config:']} {e}")
     
         self.tray_config = tray_info
         return tray_info
@@ -445,6 +454,17 @@ class JWMMenuParser:
             self.icon_paths = self.extract_icon_paths(root)
             
             applications = {}
+            self.icon_paths.append("/var/lib/flatpak/exports/share/icons/hicolor/48x48/apps")
+            self.icon_paths.append("/var/lib/flatpak/exports/share/icons/hicolor/scalable/apps")
+            
+            # PRIMERO: Obtener lista de aplicaciones Flatpak para comparar
+            flatpak_apps_list = self.parse_flatpak_applications()
+            flatpak_app_names = {app['Name'].lower() for app in flatpak_apps_list}
+            flatpak_execs = {app['Exec'].lower() for app in flatpak_apps_list}
+            
+            # SET para rastrear aplicaciones ya procesadas
+            processed_apps = set()
+            
             for menu in root.findall('.//Menu'):
                 label = menu.get('label', 'Unknown')
                 if label:
@@ -454,8 +474,58 @@ class JWMMenuParser:
                     if apps:
                         if normalized_label not in applications:
                             applications[normalized_label] = []
-                        applications[normalized_label].extend(apps)
-            
+                        
+                        for app in apps:
+                            # Crear una clave única para identificar la aplicación
+                            app_key = f"{app.get('Name', '')}|{app.get('Exec', '')}"
+                            
+                            # Verificar si es una aplicación Flatpak (por nombre o comando)
+                            app_name_lower = app.get('Name', '').lower()
+                            app_exec_lower = app.get('Exec', '').lower()
+                            is_flatpak = (app_name_lower in flatpak_app_names or 
+                                         any(flatpak_exec in app_exec_lower for flatpak_exec in flatpak_execs))
+                            
+                            if is_flatpak:
+                                continue
+                            
+                            # Si la aplicación ya fue procesada en otra categoría, no agregarla
+                            if app_key not in processed_apps:
+                                applications[normalized_label].append(app)
+                                processed_apps.add(app_key)
+                            else:
+                                pass  # Aplicación duplicada, saltar
+                            
+            # --- AGREGAR APLICACIONES FLATPAK ---
+            if flatpak_apps_list:
+                if 'Flatpak' not in applications:
+                    applications['Flatpak'] = []
+                
+                # Solo agregar Flatpaks únicos
+                flatpak_processed = set()
+                for app in flatpak_apps_list:
+                    app_key = f"{app.get('Name', '')}|{app.get('Exec', '')}"
+                    if app_key not in flatpak_processed:
+                        applications['Flatpak'].append(app)
+                        flatpak_processed.add(app_key)
+                    else:
+                        pass  # Flatpak duplicado, saltar
+                            
+            # --- NUEVO: AGREGAR APLICACIONES AppImage ---           
+            appimage_apps = self.parse_desktop_applications()
+            if appimage_apps:
+                if 'AppImage' not in applications:
+                    applications['AppImage'] = []
+                
+                # Solo agregar AppImages únicos
+                appimage_processed = set()
+                for app in appimage_apps:
+                    app_key = f"{app.get('Name', '')}|{app.get('Exec', '')}"
+                    if app_key not in appimage_processed:
+                        applications['AppImage'].append(app)
+                        appimage_processed.add(app_key)
+                    else:
+                        pass  # AppImage duplicado, saltar
+                            
             root_programs = []
             # Buscar elementos Program directos bajo root
             for program in root.findall('./Program'):
@@ -474,21 +544,33 @@ class JWMMenuParser:
                         'Categories': []
                     }
                     
+                    # Verificar si es una aplicación Flatpak
+                    app_name_lower = label.lower()
+                    app_exec_lower = command.lower()
+                    is_flatpak = (app_name_lower in flatpak_app_names or 
+                                 any(flatpak_exec in app_exec_lower for flatpak_exec in flatpak_execs))
                     
+                    if is_flatpak:
+                        continue
                     
-                    if label.lower() in ['help', 'ayuda']:
-                        if 'Help' not in applications:
-                            applications['Help'] = []
-                        applications['Help'].append(app_info)
+                    app_key = f"{label}|{command}"
+                    
+                    if app_key not in processed_apps:
+                        processed_apps.add(app_key)
                         
-                    elif label.lower() in ['leave', 'salir', 'exit', 'logout']:
-                        if 'Leave' not in applications:
-                            applications['Leave'] = []
-                        applications['Leave'].append(app_info)
-                        
-                    else:
-                        root_programs.append(app_info)
-            
+                        if label.lower() in ['help', 'ayuda']:
+                            if 'Help' not in applications:
+                                applications['Help'] = []
+                            applications['Help'].append(app_info)
+                            
+                        elif label.lower() in ['leave', 'salir', 'exit', 'logout']:
+                            if 'Leave' not in applications:
+                                applications['Leave'] = []
+                            applications['Leave'].append(app_info)
+                            
+                        else:
+                            root_programs.append(app_info)
+                
             # También buscar elementos Program dentro de RootMenu
             for root_menu in root.findall('.//RootMenu'):
                 
@@ -508,25 +590,36 @@ class JWMMenuParser:
                             'Categories': []
                         }
                         
-                       
+                        # Verificar si es una aplicación Flatpak
+                        app_name_lower = label.lower()
+                        app_exec_lower = command.lower()
+                        is_flatpak = (app_name_lower in flatpak_app_names or 
+                                     any(flatpak_exec in app_exec_lower for flatpak_exec in flatpak_execs))
                         
-                        if label.lower() in ['help', 'ayuda']:
-                            if 'Help' not in applications:
-                                applications['Help'] = []
-                            applications['Help'].append(app_info)
+                        if is_flatpak:
+                            continue
+                        
+                        app_key = f"{label}|{command}"
+                        
+                        if app_key not in processed_apps:
+                            processed_apps.add(app_key)
                             
-                        elif label.lower() in ['leave', 'salir', 'exit', 'logout']:
-                            if 'Leave' not in applications:
-                                applications['Leave'] = []
-                            applications['Leave'].append(app_info)
-                            
-                        else:
-                            root_programs.append(app_info)
-            
+                            if label.lower() in ['help', 'ayuda']:
+                                if 'Help' not in applications:
+                                    applications['Help'] = []
+                                applications['Help'].append(app_info)
+                                
+                            elif label.lower() in ['leave', 'salir', 'exit', 'logout']:
+                                if 'Leave' not in applications:
+                                    applications['Leave'] = []
+                                applications['Leave'].append(app_info)
+                                
+                            else:
+                                root_programs.append(app_info)
+                
             if root_programs:
                 applications['System'] = applications.get('System', []) + root_programs
-                           
-            
+                
             return applications if applications else self.get_fallback_applications()
             
         except Exception as e:
@@ -664,8 +757,66 @@ class JWMMenuParser:
         for path in default_paths:
             if path not in paths:
                 paths.append(path)
+                
+        # AGREGAR RUTAS DE FLATPAK AQUÍ
+        for flatpak_path in FLATPAK_ICON_DIRS:
+            if flatpak_path not in paths:
+                paths.append(flatpak_path)                
         
         return paths
+        
+    def parse_desktop_applications(self):
+        """Parse applications from .desktop files with Categories=AppImage"""
+        desktop_dirs = [
+            "/usr/share/applications",
+            "/usr/local/share/applications", 
+            "/root/.local/share/applications"
+        ]
+        
+        appimage_apps = []
+        
+        for desktop_dir in desktop_dirs:
+            if not os.path.exists(desktop_dir):
+                continue
+                
+            for filename in os.listdir(desktop_dir):
+                if not filename.endswith('.desktop'):
+                    continue
+                    
+                desktop_file = os.path.join(desktop_dir, filename)
+                try:
+                    with open(desktop_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        
+                    if 'Categories=AppImage' in content:
+                        # Extraer información
+                        name = ""
+                        exec_cmd = ""
+                        icon = ""
+                        
+                        for line in content.split('\n'):
+                            if line.startswith('Name='):
+                                name = line.split('=', 1)[1].strip()
+                            elif line.startswith('Exec='):
+                                exec_cmd = line.split('=', 1)[1].strip()
+                            elif line.startswith('Icon='):
+                                icon = line.split('=', 1)[1].strip()
+                        
+                        if name and exec_cmd:
+                            app_info = {
+                                'Name': name,
+                                'Exec': exec_cmd,
+                                'Icon': icon or 'application-x-executable',
+                                'Comment': 'AppImage Application',
+                                'Terminal': False,
+                                'Categories': ['AppImage']
+                            }
+                            appimage_apps.append(app_info)
+                            
+                except:
+                    continue
+        
+        return appimage_apps        
         
     def parse_lxde_panel_config(self):
         """Parse LXDE panel configuration to get position and size"""
@@ -768,8 +919,81 @@ class JWMMenuParser:
                 {'Name': 'Firefox', 'Exec': 'firefox', 'Icon': 'firefox', 'Comment': 'Web browser', 'Terminal': False, 'Categories': []},
             ]
         } 
-
         
+    def parse_flatpak_applications(self):
+        """Parse applications from Flatpak .desktop files"""
+        flatpak_apps = []
+        
+        if not os.path.exists(FLATPAK_APPLICATIONS_DIR):
+            return flatpak_apps
+        
+        try:
+            for filename in os.listdir(FLATPAK_APPLICATIONS_DIR):
+                if not filename.endswith('.desktop'):
+                    continue
+                    
+                desktop_file = os.path.join(FLATPAK_APPLICATIONS_DIR, filename)
+                try:
+                    with open(desktop_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Verificar si NoDisplay=true (no mostrar)
+                    if 'NoDisplay=true' in content or 'Hidden=true' in content:
+                        continue
+                    
+                    # Extraer información
+                    name = ""
+                    exec_cmd = ""
+                    icon = ""
+                    comment = ""
+                    terminal = False
+                    categories = []
+                    
+                    for line in content.split('\n'):
+                        line_lower = line.lower()
+                        if line_lower.startswith('name='):
+                            name = line.split('=', 1)[1].strip()
+                        elif line_lower.startswith('exec='):
+                            exec_cmd = line.split('=', 1)[1].strip()
+                        elif line_lower.startswith('icon='):
+                            icon = line.split('=', 1)[1].strip()
+                        elif line_lower.startswith('comment='):
+                            comment = line.split('=', 1)[1].strip()
+                        elif line_lower.startswith('terminal='):
+                            terminal = line.split('=', 1)[1].strip().lower() == 'true'
+                        elif line_lower.startswith('categories='):
+                            cats_line = line.split('=', 1)[1].strip()
+                            if cats_line and cats_line != '':
+                                categories = [cat.strip() for cat in cats_line.split(';') if cat.strip()]
+                    
+                    if name and exec_cmd:
+                        # Limpiar el comando Exec
+                        exec_cmd = exec_cmd.strip()
+                        
+                        app_info = {
+                            'Name': name,
+                            'Exec': exec_cmd,
+                            'Icon': icon or 'application-x-executable',
+                            'Comment': comment or 'Flatpak Application',
+                            'Terminal': terminal,
+                            'Categories': ['Flatpak'],  # FORZAR categoría Flatpak
+                            'OriginalCategories': categories,  # Guardar originales por si acaso
+                            'DesktopFile': filename
+                        }
+                        flatpak_apps.append(app_info)
+                            
+                except Exception as e:
+                    print(f"Error parsing Flatpak desktop file {filename}: {e}")
+                    continue
+            
+            # Guardar en caché
+            self.flatpak_apps_cache = flatpak_apps
+            return flatpak_apps
+            
+        except Exception as e:
+            print(f"Error accessing Flatpak directory: {e}")
+            return [] 
+      
 class ArcMenuLauncher(Gtk.Window):
     def __init__(self, icon_size=None, jwm_file=None, x=None, y=None):
         super().__init__(title="PyMenuPup")
@@ -788,6 +1012,7 @@ class ArcMenuLauncher(Gtk.Window):
         self.categories_listbox = None
         self.search_entry = None
         self.profile_image = None
+        self.setup_flatpak_monitoring()
     
         self.icon_cache = {}
         self.current_category = "All"
@@ -828,6 +1053,63 @@ class ArcMenuLauncher(Gtk.Window):
                 print(f"👀 Monitoreando cambios XFCE panel: {self.parser.xfce_config_file}")
             except Exception as e:
                 print(f"⚠️  Error monitoreando XFCE: {e}")
+                
+    def setup_flatpak_monitoring(self):
+        """Configurar monitoreo de cambios en aplicaciones Flatpak"""
+        try:
+            # Monitorear el directorio de aplicaciones Flatpak
+            if os.path.exists(FLATPAK_APPLICATIONS_DIR):
+                flatpak_dir = Gio.File.new_for_path(FLATPAK_APPLICATIONS_DIR)
+                flatpak_monitor = flatpak_dir.monitor_directory(
+                    Gio.FileMonitorFlags.WATCH_MOVES, 
+                    None
+                )
+                flatpak_monitor.connect("changed", self.on_flatpak_changed)
+
+                
+                # Guardar referencia
+                self.flatpak_monitor = flatpak_monitor
+            
+            # También monitorear las carpetas de íconos
+            for icon_dir in FLATPAK_ICON_DIRS:
+                if os.path.exists(icon_dir):
+                    icon_dir_file = Gio.File.new_for_path(icon_dir)
+                    icon_monitor = icon_dir_file.monitor_directory(
+                        Gio.FileMonitorFlags.WATCH_MOVES, 
+                        None
+                    )
+                    icon_monitor.connect("changed", self.on_flatpak_changed)
+                    print(f"👀 Monitoreando íconos Flatpak: {icon_dir}")
+                    
+        except Exception as e:
+            print(f"⚠️ Error configurando monitoreo Flatpak: {e}")   
+            
+    def on_flatpak_changed(self, monitor, file, other_file, event_type):
+        """Reposicionar menú cuando cambia la configuración del panel XFCE"""
+        # Ignorar eventos que no sean importantes
+        if event_type not in [
+            Gio.FileMonitorEvent.CREATED,
+            Gio.FileMonitorEvent.DELETED,
+            Gio.FileMonitorEvent.MOVED_IN,
+            Gio.FileMonitorEvent.MOVED_OUT
+        ]:
+            return
+        
+        print("🔄 Cambios detectados en Flatpak, actualizando menú...")
+        
+        # Actualizar aplicaciones
+        self.applications = self.parser.parse_jwm_menu()
+        
+        # Si hay una categoría Flatpak activa, actualizarla
+        if self.current_category == 'Flatpak':
+            self.show_category_applications('Flatpak')
+        elif 'Flatpak' in self.applications and self.applications['Flatpak']:
+            # Si hay búsqueda activa, actualizar resultados
+            if self.search_entry and self.search_entry.get_text():
+                self.on_search_changed(self.search_entry)
+        
+        print("✅ Menú actualizado con cambios de Flatpak")            
+                         
     def apply_css(self):
         """Loads and applies CSS from the configuration."""
         # Verificar si debe usar tema GTK
@@ -2162,7 +2444,9 @@ class ArcMenuLauncher(Gtk.Window):
             'Network': 'connect48',          # Para conexiones de red
             'Internet': 'www48',             # Para navegadores
             'Multimedia': 'multimedia48',    # Para reproductores
-            'Fun': 'games48',                # Suponiendo que tengas un 'games48.png'
+            'Fun': 'games48',                     # Suponiendo que tengas un 'games48.png'
+            'Flatpak': 'pet48',
+            'AppImage': 'archive48',               
             'Help': 'help48',
             'Shutdown': 'shutdown48',           # Suponiendo que tengas un 'shutdown48.png'
              'Rectify': 'save48',
@@ -2171,7 +2455,8 @@ class ArcMenuLauncher(Gtk.Window):
     
         preferred_order = ['Desktop', 'System', 'Setup', 'Utility', 'Filesystem', 
                            'Graphic', 'Document', 'Business', 'Personal', 
-                           'Network', 'Internet', 'Multimedia', 'Fun', 'Help', 'Leave']
+                           'Network', 'Internet', 'Multimedia', 'Fun',
+                           'Flatpak', 'AppImage', 'Help', 'Leave']
         
         # Obtener categorías excluidas desde la configuración
         excluded_categories = self.config.get('categories', {}).get('excluded', [])
