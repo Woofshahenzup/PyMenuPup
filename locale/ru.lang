@@ -4,7 +4,10 @@
 # ============================================
 
 # === Главное окно ===
+PyMenu Configurator = Конфигуратор PyMenu
 PyMenuPup Configurator = Конфигуратор PyMenuPup
+Configurator = Конфигуратор
+General = Общие
 Window = Окно
 Colors = Цвета
 Font = Шрифт
@@ -19,29 +22,47 @@ Error loading config file: = Ошибка при загрузке файла к�
 Using default config. = Использование конфигурации по умолчанию.
 Config saved (without closing). = Конфигурация сохранена (без закрытия).
 An error occurred: = Произошла ошибка:
+Warning: pymenupuplang not found: = Внимание: pymenupuplang не найден:
 
 # === Главный интерфейс ===
 Search applications... = Поиск приложений...
-Shutdown = Выключение
 Search in the web = Поиск в интернете
 Pymenu config = Настройка Pymenu
 Select avatar = Выбрать аватар
+Run = Выполнить
+Create desktop shortcut = Создать ярлык на рабочем столе
+App = Приложение
+
+# === Приложения по умолчанию ===
 Terminal = Терминал
 Terminal emulator = Эмулятор терминала
 File Manager = Файловый менеджер
 File manager = Файловый менеджер
 Firefox = Firefox
 Web browser = Веб-браузер
-Run = Выполнить
-Create desktop shortcut = Создать ярлык на рабочем столе
 
 # === Пользовательские папки ===
+Home = Домашняя папка
 DownloadsDir = Загрузки
+Downloads = Загрузки
 MusicDir = Музыка
+Music = Музыка
 VideosDir = Видео
+Videos = Видео
 PicturesDir = Изображения
+Pictures = Изображения
 DocumentsDir = Документы
+Documents = Документы
+Desktop = Рабочий стол
+Templates = Шаблоны
+Public = Общие
+Recent = Недавние
 Open directory: = Открыть папку:
+
+# === Избранное и места ===
+Favorites = Избранное
+Hide favorites: = Скрыть избранное:
+Hide places: = Скрыть папки (места):
 
 # === Социальные сети ===
 Social Networks = Социальные сети
@@ -51,21 +72,29 @@ Hide social networks: = Скрыть социальные сети:
 Window width: = Ширина окна:
 Window height: = Высота окна:
 Icon size: = Размер иконок:
+App icon size: = Размер иконок приложений:
 Category icon size: = Размер иконок категорий:
 Profile pic size: = Размер фото профиля:
 Profile pic shape: = Форма фото профиля:
 Show window frame: = Показать рамку окна:
+Border width: = Ширина границы:
+Corner radius: = Радиус закругления:
+Vertical padding: = Вертикальный отступ:
 (No transparency) = (Без прозрачности)
+Background opacity: = Прозрачность фона:
 
 # === Параметры видимости ===
 Hide header: = Скрыть заголовок:
 Hide profile picture: = Скрыть фото профиля:
+Hide profile picture in places: = Скрыть фото профиля в местах:
+Profile in places: = Профиль в местах:
 Hide quick access: = Скрыть быстрый доступ:
 Hide categories text: = Скрыть текст категорий:
 Hide app names: = Скрыть названия приложений:
 Hide OS name: = Скрыть название ОС:
 Hide kernel: = Скрыть ядро:
 Hide hostname: = Скрыть имя хоста:
+Show app comments: = Показать описание приложений:
 
 # === Дизайн заголовка ===
 Header layout: = Макет заголовка:
@@ -86,18 +115,31 @@ right = справа
 # === Выравнивание ===
 Horizontal alignment: = Горизонтальное выравнивание:
 Search bar position: = Позиция строки поиска:
+Search bar container: = Контейнер строки поиска:
+
+# === Поведение приложения ===
+Close on click: = Закрывать при клике:
+Stay on top: = Поверх всех окон:
 
 # === Цвета ===
 Use system theme: = Использовать системную тему:
+Use GTK theme: = Использовать тему GTK:
 Background color: = Цвет фона:
 Border color: = Цвет границы:
 Categories background: = Фон категорий:
 Text normal: = Обычный текст:
+Text color: = Цвет текста:
 Header (OS): = Заголовок (ОС):
+Header OS: = Заголовок ОС:
 Header (Kernel): = Заголовок (Ядро):
+Header Kernel: = Заголовок Ядро:
 Header (Hostname): = Заголовок (Хост):
+Header Hostname: = Заголовок Хост:
 Hover background: = Фон при наведении:
+Selected background: = Фон выделения:
+Selected text: = Текст выделения:
 Button background: = Фон кнопки:
+Button normal background: = Обычный фон кнопки:
 Button text: = Текст кнопки:
 
 # === Шрифты ===
@@ -106,29 +148,73 @@ Category font: = Шрифт категорий:
 Category size: = Размер категорий:
 App name size: = Размер названия приложения:
 Header size: = Размер заголовка:
+Font size: = Размер шрифта:
 
 # === Пути ===
 Profile pic path: = Путь к фото профиля:
+Profile image: = Фото профиля:
 Profile manager: = Менеджер профиля:
+Terminal: = Терминал:
+File manager: = Файловый менеджер:
+Web browser: = Веб-браузер:
 Shutdown command: = Команда выключения:
 JWM Tray config: = Конфигурация трея JWM:
 Tint2 config: = Конфигурация Tint2:
+XFCE panel config: = Конфигурация панели XFCE:
+LXDE panel config: = Конфигурация панели LXDE:
 Use Tint2 (instead of JWM): = Использовать Tint2 (вместо JWM):
 
-# === Категории ===
+# === Motores de búsqueda ===
+Search engine: = Поисковая система:
+DuckDuckGo = DuckDuckGo
+Google = Google
+Bing = Bing
+Yahoo = Yahoo
+Yandex = Яндекс
+
+# === Tipos de Panel/Tray ===
+Tray/Panel type: = Тип панели/трея:
+JWM Tray = Трей JWM
+Tint2 Panel = Панель Tint2
+XFCE Panel = Панель XFCE
+LXDE Panel = Панель LXDE
+
+# === Diálogos de selección de archivos ===
+Select Profile Picture = Выберите фото профиля
+Select profile picture = Выберите фото профиля
+Select Profile Manager = Выберите менеджер профиля
+Select profile manager = Выберите менеджер профиля
+Select Program = Выберите программу
+Select shutdown command = Выберите команду выключения
+Select JWM Config = Выберите конфигурацию JWM
+Select JWM config = Выберите конфигурацию JWM
+Select Tint2 Config = Выберите конфигурацию Tint2
+Select Tint2 config = Выберите конфигурацию Tint2
+Select XFCE panel config = Выберите конфигурацию панели XFCE
+Select LXDE panel config = Выберите конфигурацию панели LXDE
+Select Terminal = Выберите терминал
+Select File Manager = Выберите файловый менеджер
+Select Web Browser = Выберите веб-браузер
+All Files = Все файлы
+Images = Изображения
+Executables = Исполняемые файлы
+Configuration Files = Файлы конфигурации
+
+# === Categorías ===
 Excluded categories: = Исключенные категории:
 Select categories to hide from menu = Выберите категории для скрытия из меню
 
-# === Названия категорий ===
+# === Nombres de categorías ===
 Desktop = Рабочий стол
 System = Система
-Setup = Настройка
+Setup = Настройки
 Utility = Утилиты
 Filesystem = Файловая система
 Graphic = Графика
-Document = Документы
-Business = Офис
-Personal = Личное
+Document = Офис
+Business = Бизнес
+Personal = Личные
+Settings = Настройки
 Network = Сеть
 Internet = Интернет
 Multimedia = Мультимедиа
@@ -137,3 +223,39 @@ Help = Справка
 Rectify = Исправить
 Shutdown = Выключить
 Leave = Выйти
+
+# === Mensajes del sistema y depuración ===
+Folder created: = Папка создана:
+File /etc/windowmanager not found, assuming JWM = Файл /etc/windowmanager не найден, предполагается JWM
+Window Manager detected: = Обнаружен оконный менеджер:
+Automatically using Tint2 config = Автоматическое использование конфигурации Tint2
+Automatically using XFCE config = Автоматическое использование конфигурации XFCE
+Automatically using LXDE config = Автоматическое использование конфигурации LXDE
+Using user configuration = Использование пользовательской конфигурации
+Panel configuration detected from XFCE: = Конфигурация панели обнаружена в XFCE:
+Panel configuration detected from LXDE: = Конфигурация панели обнаружена в LXDE:
+Tray configuration detected from tint2rc: = Конфигурация трея обнаружена в tint2rc:
+Tray configuration detected from = Конфигурация трея обнаружена в:
+Error parsing tint2 config: = Ошибка при разборе конфигурации tint2:
+Tint2 config not found at: = Конфигурация Tint2 не найдена в:
+JWM file not found: = Файл JWM не найден:
+Error parsing JWM tray config: = Ошибка при разборе конфигурации трея JWM:
+Now monitoring JWM file for changes: = Мониторинг изменений файла JWM:
+
+# === Acciones e interfaz ===
+Shortcut created: = Ярлык создан:
+Acceso creado para = Ярлык создан для
+Command validated: = Команда проверена:
+Error creating shortcut: = Ошибка при создании ярлыка:
+
+# === Iconos y temas ===
+Error reading icon theme: = Ошибка чтения темы значков:
+Icon theme folder does not exist: = Папка темы значков не существует:
+Error loading folder icon = Ошибка загрузки значка папки
+Error loading icon = Ошибка загрузки значка
+No icon found in theme: = Значок не найден в теме:
+
+# === Opciones adicionales de ventana ===
+Decorated window: = Оформленное окно:
+apps_column = колонка приложений
+main_column = главная колонка

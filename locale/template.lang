@@ -1,6 +1,6 @@
 # ============================================
 # PyMenuPup - Translation Template
-# Version: 1.1
+# Version: 1.2
 # Instructions: Copy this file as 'your_language_code.lang' 
 # (e.g., fr.lang, de.lang) and translate the text after the '='.
 # ============================================
@@ -14,6 +14,92 @@ Paths =
 Categories = 
 Save = 
 Exit = 
+
+# === Window Tab ===
+Window width: = 
+Window height: = 
+Show window frame: = 
+(No transparency) = 
+Hide header: = 
+Hide profile picture: = 
+Hide categories text: = 
+Hide app names: = 
+Hide places sidebar: = 
+(Hides both places and favorites) = 
+Hide favorites only: = 
+(Show places but hide favorites) = 
+Show profile in places sidebar: = 
+(Instead of header) = 
+Header layout: = 
+Avatar left = 
+Avatar center = 
+Avatar right = 
+Header text alignment: = 
+left = 
+center = 
+right = 
+Hide OS name: = 
+Hide kernel: = 
+Hide hostname: = 
+Icon size: = 
+Category icon size: = 
+Profile pic size: = 
+Profile pic shape: = 
+square = 
+circular = 
+Horizontal alignment: = 
+center = 
+left = 
+right = 
+Search bar position: = 
+Search bar container: = 
+In window = 
+In applications column = 
+
+# === Colors Tab ===
+Use system theme: = 
+Background color: = 
+Border color: = 
+Categories background: = 
+Text normal: = 
+Header (OS): = 
+Header (Kernel): = 
+Header (Hostname): = 
+Hover background: = 
+Button background: = 
+Button text: = 
+Background opacity: = 
+
+# === Font Tab ===
+Font family: = 
+Category font: = 
+Category size: = 
+App name size: = 
+Header size: = 
+
+# === Paths Tab ===
+Profile pic path: = 
+Profile manager: = 
+Shutdown command: = 
+JWM Tray config: = 
+Tint2 config: = 
+XFCE panel config: = 
+LXDE panel config: = 
+Search engine: = 
+DuckDuckGo = 
+Google = 
+Brave Search = 
+SearXNG = 
+LibreX = 
+Bing = 
+Yahoo = 
+Startpage = 
+Ecosia = 
+Tray/Panel type: = 
+JWM Tray = 
+Tint2 Panel = 
+XFCE Panel = 
+LXDE Panel = 
 
 # === System Messages (Config) ===
 Config file not found. Creating default config. = 
@@ -57,6 +143,7 @@ Error creando acceso directo: =
 Open directory = 
 
 # === User Directories (XDG) ===
+Home = 
 DownloadsDir = 
 MusicDir = 
 VideosDir = 
@@ -68,37 +155,9 @@ Open directory: =
 Social Networks = 
 Hide social networks = 
 
-# === GUI Configuration Settings ===
-General = 
-Search bar position: = 
-Use system theme: = 
-Background color: = 
-Border color: = 
-Categories background: = 
-Text normal: = 
-Header (OS): = 
-Header (Kernel): = 
-Header (Hostname): = 
-Hover background: = 
-Button background: = 
-Button text: = 
-Font family: = 
-Category font: = 
-Category size: = 
-App name size: = 
-Header size: = 
-Profile pic path: = 
-Profile manager: = 
-Shutdown command: = 
-JWM Tray config: = 
-Tint2 config: = 
-Use Tint2 (instead of JWM): = 
-Search engine: = 
-Hide favorites = 
-
-# === Categories ===
-Excluded categories: = 
+# === Categories Tab ===
 Select categories to hide from menu = 
+Excluded categories: = 
 
 # === Category Names ===
 Desktop = 
@@ -115,14 +174,9 @@ Internet =
 Multimedia = 
 Fun = 
 Help = 
-Rectify =
-
-# === Tray/Panel ===
-Tray/Panel type: = 
-JWM Tray = 
-Tint2 Panel = 
-XFCE Panel = 
-XFCE panel config: = 
+Rectify = 
+Shutdown = 
+Leave = 
 
 # === Favorites Management ===
 Favorites = 
@@ -132,6 +186,7 @@ Add Favorite =
 Edit Favorite = 
 Add = 
 Edit = 
+Save = 
 Select an application: = 
 Search applications... = 
 Application = 
@@ -153,7 +208,8 @@ Command =
 Select Directory = 
 Select Icon = 
 Image files = 
-All files =
+All files = 
+
 # === Visible Folders in Places Sidebar ===
 Visible Folders in Places Sidebar = 
 Select which folders to show in the Places sidebar: = 
@@ -164,16 +220,13 @@ Templates =
 Public = 
 Recent = 
 
-# === Additional favorites messages ===
-Search applications... = 
-Select = 
-Select = 
-Cancel = 
-
 # === Configuration Dialogs ===
 Select profile picture = 
 Select profile manager = 
 Select shutdown command = 
 Select JWM config = 
 Select Tint2 config = 
-Select XFCE panel config =
+Select XFCE panel config = 
+Select LXDE panel config = 
+Cancel = 
+Select = 
